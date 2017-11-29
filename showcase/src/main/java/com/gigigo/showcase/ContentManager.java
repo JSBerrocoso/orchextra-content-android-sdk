@@ -17,7 +17,9 @@ import com.gigigo.orchextra.ocm.callbacks.OnEventCallback;
 import com.gigigo.orchextra.ocm.views.UiGridBaseContentData;
 import com.gigigo.showcase.main.MainActivity;
 import com.gigigo.showcase.settings.ProjectData;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class ContentManager {
@@ -86,6 +88,12 @@ public class ContentManager {
         new OcmStyleUiBuilder().setTitleToolbarEnabled(true).setEnabledStatusBar(true);
 
     Ocm.setStyleUi(ocmStyleUiBuilder);
+
+    List<String> deviceBusinessUnits = new ArrayList<>();
+    deviceBusinessUnits.add("es");
+    deviceBusinessUnits.add("it");
+
+    orchextra.getCrmManager().setDeviceData(null, deviceBusinessUnits);
   }
 
   public void clear() {
