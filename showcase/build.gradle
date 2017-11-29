@@ -25,7 +25,6 @@ android {
     versionName "1.0-RC" + computeVersionCode()
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    multiDexEnabled true
   }
 
   buildTypes {
@@ -64,9 +63,10 @@ dependencies {
   implementation 'com.android.support:support-v4:26.1.0'
   implementation 'com.android.support:design:26.1.0'
 
-  implementation project(path: ':ocmsdk')
+  implementation(project(path: ':ocmsdk')) {
+    exclude group: 'com.github.GigigoGreenLabs.gggUtilsSuite'
+  }
 
-  implementation 'com.android.support:multidex:1.0.2'
   implementation 'com.github.GigigoGreenLabs.imgRecogModule:vuforiaimplementation:2.6'
   implementation 'com.github.GigigoGreenLabs.imgRecogModule:vuforiaimplementation:2.6'
   implementation 'com.android.support:support-v4:26.1.0'
@@ -78,6 +78,12 @@ dependencies {
   testImplementation 'junit:junit:4.12'
   androidTestImplementation 'com.android.support.test:runner:1.0.1'
   androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
+  implementation 'com.j256.ormlite:ormlite-core:5.0'
+  implementation 'com.j256.ormlite:ormlite-android:5.0'
+  implementation 'com.squareup.retrofit2:converter-moshi:2.3.0'
+  implementation 'com.google.firebase:firebase-core:11.0.4'
+  implementation 'com.google.firebase:firebase-messaging:11.0.4'
 }
 
 applivery {

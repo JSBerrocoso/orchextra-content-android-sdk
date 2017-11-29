@@ -3,9 +3,9 @@ package com.gigigo.showcase;
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
-import com.gigigo.orchextra.CrmUser;
-import com.gigigo.orchextra.Orchextra;
+import com.gigigo.orchextra.core.Orchextra;
 import com.gigigo.orchextra.core.controller.model.grid.ImageTransformReadArticle;
+import com.gigigo.orchextra.core.domain.entities.OxCRM;
 import com.gigigo.orchextra.ocm.OCManagerCallbacks;
 import com.gigigo.orchextra.ocm.Ocm;
 import com.gigigo.orchextra.ocm.OcmBuilder;
@@ -17,8 +17,7 @@ import com.gigigo.orchextra.ocm.callbacks.OnEventCallback;
 import com.gigigo.orchextra.ocm.views.UiGridBaseContentData;
 import com.gigigo.showcase.main.MainActivity;
 import com.gigigo.showcase.settings.ProjectData;
-import com.gigigo.vuforiaimplementation.ImageRecognitionVuforiaImpl;
-import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.Map;
 
 public class ContentManager {
@@ -26,6 +25,7 @@ public class ContentManager {
   private static final ContentManager instance = new ContentManager();
   private static final String COUNTRY = "it";
   private Handler handler;
+  private Orchextra orchextra;
 
   public static ContentManager getInstance() {
     return instance;
@@ -33,20 +33,27 @@ public class ContentManager {
 
   private ContentManager() {
     this.handler = new Handler(Looper.getMainLooper());
+    this.orchextra = Orchextra.INSTANCE;
   }
 
-  public void init(Application application) {
+  public void start(Application application, ContentManagerCallback<String> callback) {
+    start(application, ProjectData.getDefaultApiKey(), ProjectData.getDefaultApiSecret(), callback);
+  }
+
+  public void start(Application application, String apiKey, String apiSecret,
+      final ContentManagerCallback<String> callback) {
+
+    //Ocm.setBusinessUnit(COUNTRY);
 
     OcmBuilder ocmBuilder =
         new OcmBuilder(application).setNotificationActivityClass(MainActivity.class)
             .setShowReadArticles(true)
             .setTransformReadArticleMode(ImageTransformReadArticle.BITMAP_TRANSFORM)
             .setMaxReadArticles(100)
-            .setOrchextraCredentials(ProjectData.getDefaultApiKey(),
-                ProjectData.getDefaultApiSecret())
+            .setOrchextraCredentials(apiKey, apiSecret)
             .setContentLanguage("EN")
-            .setVuforiaImpl(new ImageRecognitionVuforiaImpl())
-            .setOxSenderId("327008883283")
+            .setFirebaseApiKey("TODO") // TODO set Firebase Api Key
+            .setFirebaseApplicationId("TODO") // TODO set Firebase Application Id
             .setOnEventCallback(new OnEventCallback() {
               @Override public void doEvent(OcmEvent event, Object data) {
               }
@@ -55,24 +62,7 @@ public class ContentManager {
               }
             });
 
-    Ocm.initialize(ocmBuilder);
-
-    OcmStyleUiBuilder ocmStyleUiBuilder =
-        new OcmStyleUiBuilder().setTitleToolbarEnabled(true).setEnabledStatusBar(true);
-
-    Ocm.setStyleUi(ocmStyleUiBuilder);
-    Ocm.setBusinessUnit(COUNTRY);
-  }
-
-  public void start(ContentManagerCallback<String> callback) {
-    start(ProjectData.getDefaultApiKey(), ProjectData.getDefaultApiSecret(), callback);
-  }
-
-  public void start(String apiKey, String apiSecret,
-      final ContentManagerCallback<String> callback) {
-
-    Ocm.setBusinessUnit(COUNTRY);
-    Ocm.startWithCredentials(apiKey, apiSecret, new OcmCredentialCallback() {
+    Ocm.init(ocmBuilder, new OcmCredentialCallback() {
       @Override public void onCredentialReceiver(final String accessToken) {
         handler.post(new Runnable() {
           @Override public void run() {
@@ -89,6 +79,11 @@ public class ContentManager {
         });
       }
     });
+
+    OcmStyleUiBuilder ocmStyleUiBuilder =
+        new OcmStyleUiBuilder().setTitleToolbarEnabled(true).setEnabledStatusBar(true);
+
+    Ocm.setStyleUi(ocmStyleUiBuilder);
   }
 
   public void clear() {
@@ -118,17 +113,15 @@ public class ContentManager {
   }
 
   public Map<String, String> getCustomFields() {
-    return Orchextra.getUserCustomFields();
+    return orchextra.getCrmManager().getCrm().getCustomFields();
   }
 
   public void setUserCustomFields(Map<String, String> customFields) {
-    Orchextra.bindUser(getCrmUser("test2"));
-    Orchextra.setUserCustomFields(customFields);
-    Orchextra.commitConfiguration();
+    orchextra.getCrmManager().bindUser(getCrmUser("test2", customFields));
   }
 
-  private CrmUser getCrmUser(String id) {
-    return new CrmUser(id, new GregorianCalendar(1990, 10, 15), CrmUser.Gender.GenderFemale);
+  private OxCRM getCrmUser(String id, Map<String, String> customFields) {
+    return new OxCRM(id, "f", new Date(), null, null, customFields);
   }
 
   public interface ContentManagerCallback<T> {

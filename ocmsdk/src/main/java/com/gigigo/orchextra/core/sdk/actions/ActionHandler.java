@@ -7,12 +7,11 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-import com.gigigo.orchextra.Orchextra;
+import com.gigigo.orchextra.core.Orchextra;
 import com.gigigo.orchextra.core.data.api.utils.ConnectionUtilsImp;
 import com.gigigo.orchextra.core.domain.entities.elementcache.FederatedAuthorization;
 import com.gigigo.orchextra.core.domain.utils.ConnectionUtils;
 import com.gigigo.orchextra.core.sdk.application.OcmContextProvider;
-
 import com.gigigo.orchextra.core.sdk.model.detail.viewtypes.youtube.YoutubeContentDataActivity;
 import com.gigigo.orchextra.core.sdk.utils.DeviceUtils;
 import com.gigigo.orchextra.ocm.OCManager;
@@ -77,11 +76,11 @@ public class ActionHandler {
   }
 
   public void launchOxVuforia() {
-    Orchextra.startImageRecognition();
+    Orchextra.INSTANCE.openImageRecognition();
   }
 
   public void lauchOxScan() {
-    Orchextra.startScannerActivity();
+    Orchextra.INSTANCE.openScanner();
   }
 
   public void launchExternalBrowser(final String url, FederatedAuthorization federatedAuth) {

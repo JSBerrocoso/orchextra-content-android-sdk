@@ -1,9 +1,10 @@
 package com.gigigo.orchextra.core.controller.model.detail;
 
-import com.gigigo.orchextra.CrmUser;
-import com.gigigo.orchextra.control.presenters.base.Presenter;
+import com.gigigo.orchextra.core.Orchextra;
+import com.gigigo.orchextra.core.OrchextraTokenReceiver;
+import com.gigigo.orchextra.core.domain.entities.OxCRM;
+import com.gigigo.orchextra.legacy.Presenter;
 import com.gigigo.orchextra.ocm.Ocm;
-import com.gigigo.orchextra.ocm.callbacks.OcmCredentialCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnFinishViewListener;
 import com.gigigo.orchextra.ocm.views.UiDetailBaseContentData;
 
@@ -37,19 +38,16 @@ public class DetailPresenter extends Presenter<DetailView> {
 
   public void setLoginUserFromNativeLogin(String userId) {
 
-    CrmUser crmUser = new CrmUser(userId, null, null);
+    OxCRM crmUser = new OxCRM(userId, null, null);
     Ocm.bindUser(crmUser);
     Ocm.setUserIsAuthorizated(true);
-    Ocm.start(new OcmCredentialCallback() {
-      @Override public void onCredentialReceiver(String accessToken) {
+
+    Orchextra.INSTANCE.getToken(new OrchextraTokenReceiver() {
+      @Override public void onGetToken(String accessToken) {
         if (!accessToken.equals(DetailPresenter.this.accessToken)) {
           DetailPresenter.this.accessToken = accessToken;
           getView().redirectToAction();
         }
-      }
-
-      @Override public void onCredentailError(String code) {
-
       }
     });
   }

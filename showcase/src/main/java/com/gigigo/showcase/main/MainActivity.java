@@ -9,7 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import com.gigigo.orchextra.Orchextra;
+import com.gigigo.orchextra.core.Orchextra;
 import com.gigigo.orchextra.ocm.Ocm;
 import com.gigigo.orchextra.ocm.OcmCallbacks;
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver;
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
     showLoading();
     ContentManager contentManager = ContentManager.getInstance();
-    contentManager.start(new ContentManager.ContentManagerCallback<String>() {
+    contentManager.start(getApplication(), new ContentManager.ContentManagerCallback<String>() {
       @Override public void onSuccess(String result) {
         getContent();
       }
@@ -116,10 +116,9 @@ public class MainActivity extends AppCompatActivity {
     Ocm.setOnCustomSchemeReceiver(new OnCustomSchemeReceiver() {
       @Override public void onReceive(String customScheme) {
         Toast.makeText(MainActivity.this, customScheme, Toast.LENGTH_SHORT).show();
-        Orchextra.startScannerActivity();
+        Orchextra.INSTANCE.openScanner();
       }
     });
-    Ocm.start();
   }
 
   void getContent() {

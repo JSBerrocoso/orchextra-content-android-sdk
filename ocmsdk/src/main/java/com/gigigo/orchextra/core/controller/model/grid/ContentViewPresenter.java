@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import android.view.View;
 import com.gigigo.multiplegridrecyclerview.entities.Cell;
 import com.gigigo.multiplegridrecyclerview.entities.CellBlankElement;
-import com.gigigo.orchextra.control.presenters.base.Presenter;
 import com.gigigo.orchextra.core.controller.dto.CellCarouselContentData;
 import com.gigigo.orchextra.core.controller.dto.CellGridContentData;
 import com.gigigo.orchextra.core.domain.OcmController;
@@ -17,6 +16,7 @@ import com.gigigo.orchextra.core.domain.entities.elements.Element;
 import com.gigigo.orchextra.core.domain.entities.menus.RequiredAuthoritation;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
 import com.gigigo.orchextra.core.sdk.ui.OcmWebViewActivity;
+import com.gigigo.orchextra.legacy.Presenter;
 import com.gigigo.orchextra.ocm.OCManager;
 import com.gigigo.orchextra.ocm.OcmEvent;
 import java.lang.ref.WeakReference;
@@ -300,20 +300,22 @@ public class ContentViewPresenter extends Presenter<ContentView> {
                 OCManager.addArticleToReadedArticles(element.getSlug());
                 System.out.println("CELL_CLICKED: " + element.getSlug());
 
-                if (elementCache.getType() != ElementCacheType.WEBVIEW )//|| imageUrlToExpandInPreview!="" )
-                {  getView().navigateToDetailView(element.getElementUrl(), imageUrlToExpandInPreview,
+                if (elementCache.getType()
+                    != ElementCacheType.WEBVIEW)//|| imageUrlToExpandInPreview!="" )
+                {
+                  getView().navigateToDetailView(element.getElementUrl(), imageUrlToExpandInPreview,
                       viewWeakReference.get());
                   //getView().navigateToDetailView(elementCache, viewWeakReference.get());
                 } else {
                   OcmWebViewActivity.open(viewWeakReference.get().getContext(),
-                               elementCache.getRender(),elementCache.getName());
-                //  if (imageUrlToExpandInPreview != "") {
-                //    OcmWebViewActivity.open(viewWeakReference.get().getContext(),
-                //        elementCache.getRender().getUrl(),elementCache.getName());
-                //  } else {
-                //    OcmWebViewActivity.open(viewWeakReference.get().getContext(),
-                //        elementCache.getRender().getUrl(),elementCache.getName(),imageUrlToExpandInPreview);
-                //  }
+                      elementCache.getRender(), elementCache.getName());
+                  //  if (imageUrlToExpandInPreview != "") {
+                  //    OcmWebViewActivity.open(viewWeakReference.get().getContext(),
+                  //        elementCache.getRender().getUrl(),elementCache.getName());
+                  //  } else {
+                  //    OcmWebViewActivity.open(viewWeakReference.get().getContext(),
+                  //        elementCache.getRender().getUrl(),elementCache.getName(),imageUrlToExpandInPreview);
+                  //  }
                 }
               }
             }

@@ -136,7 +136,7 @@ public class SettingsActivity extends AppCompatActivity {
         };
 
     showLoading();
-    contentManager.start(apiKey, apiSecret, callback);
+    contentManager.start(getApplication(), apiKey, apiSecret, callback);
   }
 
   private Map<String, String> getCurrentCustomFields() {

@@ -33,6 +33,7 @@ allprojects {
     mavenCentral()
     maven { url "https://jitpack.io" }
     maven { url "https://maven.google.com" }
+    maven { url 'https://dl.bintray.com/gigigo-desarrollo/maven' }
   }
   /*tasks.withType(JavaCompile) {
     sourceCompatibility = "1.7"
@@ -46,7 +47,7 @@ sonarqube {
     property "sonar.login", "75cc4ce0870c495e5f1dbe249f56224c114fef6c"
     property "sonar.projectName", "Ocm Android"
     property "sonar.projectKey", "ocm-android"
-//    property "sonar.projectVersion", "${rootProject.ext.ocm.version}"
+    //    property "sonar.projectVersion", "${rootProject.ext.ocm.version}"
     property "sonar.sourceEncoding", "UTF-8"
     property "sonar.scm.provider", "git"
   }
@@ -63,7 +64,8 @@ task sonarComplete(type: Exec) {
     command = command + ".bat"
   }
 
-  commandLine command, "clean", "assemble${Flavor}Debug", "lint${Flavor}Debug", "jacocoTest${Flavor}DebugUnitTestReport", "sonarqube"
+  commandLine command, "clean", "assemble${Flavor}Debug", "lint${Flavor}Debug",
+      "jacocoTest${Flavor}DebugUnitTestReport", "sonarqube"
 }
 
 task clean(type: Delete) {

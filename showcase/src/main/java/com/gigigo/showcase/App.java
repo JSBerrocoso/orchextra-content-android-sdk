@@ -1,24 +1,18 @@
 package com.gigigo.showcase;
 
+import android.app.Application;
 import android.os.StrictMode;
-import android.support.multidex.MultiDex;
-import android.support.multidex.MultiDexApplication;
 import com.squareup.leakcanary.LeakCanary;
 
-public class App extends MultiDexApplication {
+public class App extends Application {
 
   @Override public void onCreate() {
-    enableStrictMode();
     super.onCreate();
     if (LeakCanary.isInAnalyzerProcess(this)) {
       return;
     }
-
+    enableStrictMode();
     LeakCanary.install(this);
-    MultiDex.install(this);
-
-    ContentManager contentManager = ContentManager.getInstance();
-    contentManager.init(this);
   }
 
   private void enableStrictMode() {

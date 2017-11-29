@@ -9,7 +9,7 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'com.github.Orchextra'
-version ='ocmVersion'
+version = 'ocmVersion'
 
 
 apply from: 'variants.gradle'
@@ -70,14 +70,6 @@ android {
       println("flavor: " + flavor)
       println("--**********************************************************--")
     }
-
-    /* def bundleTask = tasks["bundle${name.capitalize()}"]
-     artifacts {
-       archives(bundleTask.archivePath) {
-         classifier null
-         builtBy bundleTask
-       }
-     }*/
   }
 
   lintOptions {
@@ -95,7 +87,6 @@ android {
     unitTests.returnDefaultValues = true
   }
 
-
   flavorDimensions "ocm"
 
   productFlavors {
@@ -103,21 +94,6 @@ android {
       dimension "ocm"
     }
   }
-
-
-  //true to publish all flavour artifacts
-  // publishNonDefault true
-  //defaultPublishConfig "ocmStaging"
-  //defaultPublishConfig "ocmDebug"
-  //defaultPublishConfig {"ocmRelease","ocmDebug","ocmStaging"}
-
-  // publishNonDefault is deprecated and has no effect anymore. All variants are now published.
-  // true to publish all flavour artifacts
-  //publishNonDefault true
-  //defaultPublishConfig "ocmStaging"
-  //  defaultPublishConfig "ocmDebug"
-  // default build flavour
-  //defaultPublishConfig "ocmDebug"
 }
 
 jacocoAndroidUnitTestReport {
@@ -130,25 +106,20 @@ configurations {
   ocmDebugImplementation
 }
 
-if( android.productFlavors.size() > 0 ) {
+if (android.productFlavors.size() > 0) {
   android.libraryVariants.all { variant ->
-    // Publish a main artifact, otherwise the maven pom is not generated
-    //if( variant.name == android.defaultPublishConfig ) {
     def bundleTask = tasks["bundle${name.capitalize()}"]
     artifacts {
-      println('BUNDLE!'+bundleTask.archivePath)
-      println('classifier!'+variant.name)
-      println('builtBy!'+bundleTask.name)
+      println('BUNDLE!' + bundleTask.archivePath)
+      println('classifier!' + variant.name)
+      println('builtBy!' + bundleTask.name)
       archives(bundleTask.archivePath) {
         classifier variant.name
         builtBy bundleTask
-
       }
     }
   }
-  //}
 }
-//variant.name
 
 task finalize {
   doFirst {
@@ -159,9 +130,9 @@ task finalize {
 
   println('finally!')
 }
-finalize.dependsOn(ocmsdk:install)
+finalize.dependsOn(ocmsdk: install)
 //install.finalizedBy(finalize)
-install.dependsOn(ocmsdk:build)
+install.dependsOn(ocmsdk: build)
 
 dependencies {
   //TEST
@@ -189,43 +160,13 @@ dependencies {
   //Image Loader Glide/Blur
   api project.libraries.imageloaderGlideBlur
 
+  implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
+
   //Orchextra
-  //   implementation project.libraries.oxvuforiaimplementation
-  //  ocmStagingImplementation(project.libraries.orchextrasdkStaging) { transitive = true
-  //    exclude module: 'support-v4'  }
-  //  ocmDebugImplementation(project.libraries.orchextrasdkDebug) { transitive = true
-  //    exclude module: 'support-v4' }
-  //  ocmReleaseImplementation(project.libraries.orchextrasdkRelease) { transitive = true
-  //    exclude module: 'support-v4' }
-  // implementation project.libraries.oxvuforiaimplementation
-  /*
-   ocmStagingCompile(project.libraries.orchextrasdkStaging) {
-     transitive = true
-     exclude module: 'support-v4'
-   }
-   ocmDebugCompile(project.libraries.orchextrasdkDebug) {
-     transitive = true
-     exclude module: 'support-v4'
-   }
-   ocmReleaseCompile(project.libraries.orchextrasdkRelease) {
-     transitive = true
-     exclude module: 'support-v4'
-   }
- */
-
-  stagingApi(project.libraries.orchextrasdkStaging) {
-    transitive = true
-    exclude module: 'support-v4'
-  }
-  debugApi(project.libraries.orchextrasdkDebug) {
-    transitive = true
-    exclude module: 'support-v4'
-  }
-  releaseApi(project.libraries.orchextrasdkRelease) {
-    transitive = true
-    exclude module: 'support-v4'
-  }
-
+  api 'com.gigigo.orchextra:core:3.0-RC2-S'
+  api 'com.gigigo.orchextra:geofence:3.0-RC2-S'
+  api 'com.gigigo.orchextra:indoorpositioning:3.0-RC2-S'
+  api 'com.gigigo.orchextra:scanner:3.0-RC2-S'
 
   //customs Views
   implementation project.libraries.doubleViewPager

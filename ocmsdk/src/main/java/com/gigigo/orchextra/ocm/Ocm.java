@@ -2,11 +2,9 @@ package com.gigigo.orchextra.ocm;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
-import com.gigigo.orchextra.CrmUser;
-import com.gigigo.orchextra.Orchextra;
 import com.gigigo.orchextra.core.controller.model.grid.ImageTransformReadArticle;
 import com.gigigo.orchextra.core.data.api.utils.ConnectionUtilsImp;
+import com.gigigo.orchextra.core.domain.entities.OxCRM;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
 import com.gigigo.orchextra.ocm.callbacks.OcmCredentialCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver;
@@ -24,10 +22,9 @@ import java.util.Map;
 import jp.wasabeef.glide.transformations.GrayscaleTransformation;
 
 public final class Ocm {
-@Deprecated
-  public static void TestVimeoVideoFeature(final Context context, String access_token,
+  @Deprecated public static void TestVimeoVideoFeature(final Context context, String access_token,
       String VideoId) {
-  VimeoExoPlayerActivity.open(context, null);
+    VimeoExoPlayerActivity.open(context, null);
     VimeoBuilder builder = new VimeoBuilder(access_token);
     VimeoManager vmManager = new VimeoManager(builder);
     ConnectionUtilsImp conn = new ConnectionUtilsImp(context);
@@ -46,84 +43,10 @@ public final class Ocm {
 
   private static QueryStringGenerator queryStringGenerator;
 
-  public static final String OCM_PREFERENCES = "OCMpreferencez";
-  public static final String OCM_CHANGE_CREDENTIALS_DONE = "ChangeCredentialsDONE";
-
-  public static void initialize(Application app) {
-
-    OcmBuilder ocmBuilder = new OcmBuilder(app);
-    String oxKey = "FAKE_KEY";
-    String oxSecret = "FAKE_SECRET";
-    Class notificationActivityClass = ocmBuilder.getNotificationActivityClass();
-
-    OCManager.initSdk(ocmBuilder.getApp());
-    OCManager.setContentLanguage(ocmBuilder.getContentLanguage());
-    OCManager.setDoRequiredLoginCallback(ocmBuilder.getOnRequiredLoginCallback());
-    OCManager.setEventCallback(ocmBuilder.getOnEventCallback());
-
-    OCManager.setShowReadArticles(ocmBuilder.getShowReadArticles());
-    if (ocmBuilder.getShowReadArticles() && ocmBuilder.getTransformReadArticleMode()
-        .equals(ImageTransformReadArticle.BITMAP_TRANSFORM)) {
-      if (ocmBuilder.getCustomBitmapTransformReadArticle() == null) {
-        OCManager.setBitmapTransformReadArticles(
-            new GrayscaleTransformation(app.getApplicationContext()));
-      } else {
-        OCManager.setBitmapTransformReadArticles(ocmBuilder.getCustomBitmapTransformReadArticle());
-      }
-    }
-
-    SharedPreferences prefs =
-        ocmBuilder.getApp().getSharedPreferences(OCM_PREFERENCES, Context.MODE_PRIVATE);
-    boolean IsCredentialsChanged = prefs.getBoolean(OCM_CHANGE_CREDENTIALS_DONE, false);
-
-    if (!IsCredentialsChanged) {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId());
-      Orchextra.start();
-    }
-  }
-
-  public static void initializeWithChangeCredentials(OcmBuilder ocmBuilder) {
-    String oxKey = "FAKE_KEY";
-    String oxSecret = "FAKE_SECRET";
-
-    Class notificationActivityClass = ocmBuilder.getNotificationActivityClass();
-
-    OCManager.initSdk(ocmBuilder.getApp());
-    OCManager.setContentLanguage(ocmBuilder.getContentLanguage());
-    OCManager.setDoRequiredLoginCallback(ocmBuilder.getOnRequiredLoginCallback());
-    OCManager.setEventCallback(ocmBuilder.getOnEventCallback());
-
-    OCManager.setShowReadArticles(ocmBuilder.getShowReadArticles());
-    if (ocmBuilder.getShowReadArticles() && ocmBuilder.getTransformReadArticleMode()
-        .equals(ImageTransformReadArticle.BITMAP_TRANSFORM)) {
-      if (ocmBuilder.getCustomBitmapTransformReadArticle() == null) {
-        OCManager.setBitmapTransformReadArticles(
-            new GrayscaleTransformation(ocmBuilder.getApp().getApplicationContext()));
-      } else {
-        OCManager.setBitmapTransformReadArticles(ocmBuilder.getCustomBitmapTransformReadArticle());
-      }
-    }
-    if (ocmBuilder.getShowReadArticles()) {
-      OCManager.setMaxReadArticles(ocmBuilder.getMaxReadArticles());
-    }
-
-    if (ocmBuilder.getVuforiaImpl() != null) {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId(), ocmBuilder.getVuforiaImpl());
-    } else {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId());
-    }
-
-    Ocm.start();
-  }
-
   /**
-   * Initialize the sdk. This method must be initialized in the onCreate method of the Application
-   * class
+   * Initialize the sdk
    */
-  public static void initialize(OcmBuilder ocmBuilder) {
+  public static void init(OcmBuilder ocmBuilder, OcmCredentialCallback ocmCredentialCallback) {
 
     Application app = ocmBuilder.getApp();
 
@@ -151,13 +74,9 @@ public final class Ocm {
       OCManager.setMaxReadArticles(ocmBuilder.getMaxReadArticles());
     }
 
-    if (ocmBuilder.getVuforiaImpl() != null) {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId(), ocmBuilder.getVuforiaImpl());
-    } else {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId());
-    }
+    OCManager.initOrchextra(app, oxKey, oxSecret, notificationActivityClass,
+        ocmBuilder.getFirebaseApiKey(), ocmBuilder.getFirebaseApplicationId(),
+        ocmCredentialCallback);
   }
 
   /**
@@ -228,7 +147,8 @@ public final class Ocm {
         });
   }
 
-  public static void generateActionView(ElementCache elementCache, OcmCallbacks.Section sectionCallbacks) {
+  public static void generateActionView(ElementCache elementCache,
+      OcmCallbacks.Section sectionCallbacks) {
     OCManager.generateActionView(elementCache, new OCManagerCallbacks.Section() {
       @Override public void onSectionLoaded(UiGridBaseContentData uiGridBaseContentData) {
         sectionCallbacks.onSectionLoaded(uiGridBaseContentData);
@@ -284,38 +204,10 @@ public final class Ocm {
   }
 
   /**
-   * Start or restart the sdk with a new credentials
-   */
-  public static void startWithCredentials(String apiKey, String apiSecret,
-      OcmCredentialCallback onCredentialCallback) {
-    OCManager.setNewOrchextraCredentials(apiKey, apiSecret, onCredentialCallback);
-  }
-
-  public static void start(
-      OcmCredentialCallback onCredentialCallback) {
-    OCManager.start(onCredentialCallback);
-  }
-
-
-  /**
-   * Set a business unit
-   */
-  public static void setBusinessUnit(String businessUnit) {
-    OCManager.setOrchextraBusinessUnit(businessUnit);
-  }
-
-  /**
    * Set a custom app user
    */
-  public static void bindUser(CrmUser crmUser) {
+  public static void bindUser(OxCRM crmUser) {
     OCManager.bindUser(crmUser);
-  }
-
-  /**
-   * Start the sdk with the last provided credentials.
-   */
-  public static void start() {
-    OCManager.start();
   }
 
   public static void stop() {
