@@ -118,7 +118,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     ContentManager.ContentManagerCallback callback =
         new ContentManager.ContentManagerCallback<String>() {
-          @Override public void onSuccess(String result) {
+          @Override public void onSuccess(String accessToken) {
             if (!isFinihsed) {
               contentManager.setUserCustomFields(getCurrentCustomFields());
               hideLoading();

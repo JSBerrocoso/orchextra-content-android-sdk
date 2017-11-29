@@ -7,13 +7,9 @@ import android.graphics.Bitmap;
 import android.webkit.WebStorage;
 import android.widget.ImageView;
 import com.gigigo.orchextra.core.Orchextra;
-import com.gigigo.orchextra.core.OrchextraErrorListener;
 import com.gigigo.orchextra.core.OrchextraOptions;
-import com.gigigo.orchextra.core.OrchextraStatusListener;
 import com.gigigo.orchextra.core.controller.OcmViewGenerator;
 import com.gigigo.orchextra.core.domain.OcmController;
-import com.gigigo.orchextra.core.domain.actions.actionexecutors.customaction.CustomActionListener;
-import com.gigigo.orchextra.core.domain.entities.Error;
 import com.gigigo.orchextra.core.domain.entities.OxCRM;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
@@ -327,27 +323,26 @@ public final class OCManager {
 
   public static void initOrchextra(Application app, String apiKey, String apiSecret,
       Class notificationActivityClass, String firebaseApiKey, String firebaseApplicationId,
-      OcmCredentialCallback ocmCredentialCallback) {
+      final OcmCredentialCallback ocmCredentialCallback) {
+
+    getInstance();
+    instance.oxSession.setCredentials(apiKey, apiSecret);
 
     Orchextra orchextra = Orchextra.INSTANCE;
 
-    orchextra.setStatusListener(new OrchextraStatusListener() {
-      @Override public void onStatusChange(boolean isReady) {
-
+    orchextra.setStatusListener(isReady -> {
+      if (isReady) {
+        orchextra.getToken(token -> {
+          ocmCredentialCallback.onCredentialReceiver(token);
+          instance.oxSession.setToken(token);
+        });
+      } else {
+        ocmCredentialCallback.onCredentailError("Status false");
       }
     });
-
-    orchextra.setErrorListener(new OrchextraErrorListener() {
-      @Override public void onError(Error error) {
-        ocmCredentialCallback.onCredentailError(error.getMessage());
-      }
-    });
-
-    orchextra.setCustomActionListener(new CustomActionListener() {
-      @Override public void onCustomSchema(String customScheme) {
-        returnOcCustomSchemeCallback(customScheme);
-      }
-    });
+    orchextra.setErrorListener(
+        error -> ocmCredentialCallback.onCredentailError(error.getMessage()));
+    orchextra.setCustomActionListener(OCManager::returnOcCustomSchemeCallback);
 
     OrchextraOptions options = new OrchextraOptions.Builder().firebaseApiKey(firebaseApiKey)
         .firebaseApplicationId(firebaseApplicationId)

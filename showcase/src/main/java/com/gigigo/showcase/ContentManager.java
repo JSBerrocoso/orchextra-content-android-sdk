@@ -52,8 +52,10 @@ public class ContentManager {
             .setMaxReadArticles(100)
             .setOrchextraCredentials(apiKey, apiSecret)
             .setContentLanguage("EN")
-            .setFirebaseApiKey("TODO") // TODO set Firebase Api Key
-            .setFirebaseApplicationId("TODO") // TODO set Firebase Application Id
+            .setFirebaseApiKey(
+                "AIzaSyDlMIjwx2r0oc0W7O4WPb7CvRhjCVHOZBk") // TODO set Firebase Api Key
+            .setFirebaseApplicationId(
+                "1:327008883283:android:5a0b51c3ef8892e0") // TODO set Firebase Application Id
             .setOnEventCallback(new OnEventCallback() {
               @Override public void doEvent(OcmEvent event, Object data) {
               }

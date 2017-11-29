@@ -24,6 +24,6 @@ public class OxSession {
   }
 
   public String getAccessToken() {
-    return "Bearer " + token;
+    return "JWT " + token;
   }
 }
