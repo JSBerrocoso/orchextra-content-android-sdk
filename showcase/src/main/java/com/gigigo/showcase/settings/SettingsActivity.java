@@ -116,7 +116,8 @@ public class SettingsActivity extends AppCompatActivity {
       return;
     }
 
-    ContentManager.ContentManagerCallback callback =
+    showLoading();
+    contentManager.start(getApplication(), apiKey, apiSecret,
         new ContentManager.ContentManagerCallback<String>() {
           @Override public void onSuccess(String accessToken) {
             if (!isFinihsed) {
@@ -133,10 +134,7 @@ public class SettingsActivity extends AppCompatActivity {
             hideLoading();
             showError("Credentials are not correct", "Apikey and Apisecret are invalid");
           }
-        };
-
-    showLoading();
-    contentManager.start(getApplication(), apiKey, apiSecret, callback);
+        });
   }
 
   private Map<String, String> getCurrentCustomFields() {

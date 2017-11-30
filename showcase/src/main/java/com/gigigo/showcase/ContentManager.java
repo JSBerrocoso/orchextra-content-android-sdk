@@ -25,7 +25,6 @@ import java.util.Map;
 public class ContentManager {
 
   private static final ContentManager instance = new ContentManager();
-  private static final String COUNTRY = "it";
   private Handler handler;
   private Orchextra orchextra;
 
@@ -44,8 +43,6 @@ public class ContentManager {
 
   public void start(Application application, String apiKey, String apiSecret,
       final ContentManagerCallback<String> callback) {
-
-    //Ocm.setBusinessUnit(COUNTRY);
 
     OcmBuilder ocmBuilder =
         new OcmBuilder(application).setNotificationActivityClass(MainActivity.class)
@@ -68,6 +65,12 @@ public class ContentManager {
 
     Ocm.init(ocmBuilder, new OcmCredentialCallback() {
       @Override public void onCredentialReceiver(final String accessToken) {
+
+        List<String> deviceBusinessUnits = new ArrayList<>();
+        deviceBusinessUnits.add("es");
+
+        orchextra.getCrmManager().setDeviceData(null, deviceBusinessUnits);
+
         handler.post(new Runnable() {
           @Override public void run() {
             callback.onSuccess(accessToken);
@@ -88,12 +91,6 @@ public class ContentManager {
         new OcmStyleUiBuilder().setTitleToolbarEnabled(true).setEnabledStatusBar(true);
 
     Ocm.setStyleUi(ocmStyleUiBuilder);
-
-    List<String> deviceBusinessUnits = new ArrayList<>();
-    deviceBusinessUnits.add("es");
-    deviceBusinessUnits.add("it");
-
-    orchextra.getCrmManager().setDeviceData(null, deviceBusinessUnits);
   }
 
   public void clear() {

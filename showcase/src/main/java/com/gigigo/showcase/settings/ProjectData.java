@@ -55,6 +55,10 @@ public final class ProjectData {
           "a332a27f4c136f4bf3d6958035cffdf2ee13f805", "54949ba59875b6465f292d760a389d04213af799"));
     } else {
 
+      projectDataList.add(
+          new ProjectData("IOS SDK ORX3.0", "7d1f4ae765162c5e57be31b77ac5b30c6df9ad7b",
+              "44b38136103c2e3613f1068814922c62ba71bbfb"));
+
       projectDataList.add(new ProjectData("Orchextra Demo - {{staging}}",
           "3b1f7352079beaede1b234e798bdf05a0266a0ff", "df22059fd20c5b4b6e6465ab6b044628ea9a0726"));
 
