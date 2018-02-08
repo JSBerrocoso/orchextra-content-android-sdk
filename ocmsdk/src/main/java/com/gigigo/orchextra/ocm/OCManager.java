@@ -326,41 +326,17 @@ Add Comment C
     }
   }
 
-  static void initOrchextra(String oxKey, String oxSecret, Class notificationActivityClass,
-      String senderId) {
-    if (OCManager.instance != null) {
-      Application app = (Application) instance.ocmContextProvider.getApplicationContext();
-      OCManager.instance.initOrchextra(app, oxKey, oxSecret, notificationActivityClass, senderId);
-    }
-  }
-
   static void setOrchextraBusinessUnit(String businessUnit) {
-    instance.oxManager.bindDevice(businessUnit);
-  }
 
-  //region Orchextra method
+    List<String> businessUnits = new ArrayList<>();
+    businessUnits.add(businessUnit);
 
-  static void setNewOrchextraCredentials(final String apiKey, final String apiSecret,
-      final OcmCredentialCallback ocmCredentialCallback) {
-
-    instance.oxSession.setCredentials(apiKey, apiSecret);
-
-    instance.ocmCredentialCallback = ocmCredentialCallback;
-
-    //this is new for repsol, esto hace q el primer changecredentials pase por el 401 y llege correctamente el token
-    instance.oxManager.start();
-
-    //Some case the start() and changeCredentials() method has concurrency problems
-    instance.oxManager.updateSDKCredentials(apiKey, apiSecret, true);
-  }
-
-  public static void start(OcmCredentialCallback onCredentialCallback) {
-    instance.ocmCredentialCallback = onCredentialCallback;
-    instance.oxManager.start();
+    instance.oxManager.setBusinessUnits(businessUnits);
   }
 
   static void bindUser(CrmUser crmUser) {
-    instance.oxManager.bindUser(crmUser);
+    // TODO bind user
+    //instance.oxManager.bindUser(crmUser);
   }
 
   public static Map<String, String> getLocalStorage() {
@@ -397,20 +373,15 @@ Add Comment C
   }
 
   public static void setOnCustomSchemeReceiver(OnCustomSchemeReceiver onCustomSchemeReceiver) {
-    OCManager.instance.oxManager.setOnCustomSchemeReceiver(onCustomSchemeReceiver);
-  }
-
-  public static void start() {
-    instance.oxManager.start();
+    OCManager.instance.oxManager.setCustomSchemeReceiver(onCustomSchemeReceiver);
   }
 
   public static void stop() {
-    instance.oxManager.stop();
+    instance.oxManager.finish();
   }
 
   public static void returnOcCustomSchemeCallback(String customScheme) {
-
-    instance.oxManager.callOnCustomSchemeReceiver(customScheme);
+    instance.oxManager.onCustomScheme(customScheme);
   }
 
   public static OcmContextProvider getOcmContextProvider() {
@@ -443,12 +414,28 @@ Add Comment C
   }
 
   static void initOrchextra(String oxKey, String oxSecret, Class notificationActivityClass,
-      String senderId, ImageRecognition vuforia) {
+      String senderId, ImageRecognition vuforia,
+      final OcmCredentialCallback ocmCredentialCallback) {
+
     if (OCManager.instance != null) {
+
       Application app = (Application) instance.ocmContextProvider.getApplicationContext();
-      OCManager.instance.initOrchextra(app, oxKey, oxSecret, notificationActivityClass, senderId,
-          vuforia);
+      OxConfig oxConfig = new OxConfig(oxKey, oxSecret, "", "", notificationActivityClass);
+
+      instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
+        @Override public void isReady() {
+          instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+        }
+
+        @Override public void onError(@NotNull String error) {
+          ocmCredentialCallback.onCredentailError(error);
+        }
+      });
     }
+  }
+
+  public static void getOxToken(final OcmCredentialCallback ocmCredentialCallback) {
+    instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
   }
 
   //region cookies FedexAuth
@@ -648,19 +635,6 @@ Add Comment C
     injector = new InjectorImpl(ocmComponent);
 
     ocmComponent.injectOcm(OCManager.instance);
-  }
-
-  private void initOrchextra(Application app, String oxKey, String oxSecret,
-      Class notificationActivityClass, String senderId) {
-    initOrchextra(app, oxKey, oxSecret, notificationActivityClass, senderId, null);
-  }
-
-  private void initOrchextra(Application app, String oxKey, String oxSecret,
-      Class notificationActivityClass, String senderId, ImageRecognition vuforia) {
-
-    OxConfig config = new OxConfig(oxKey, oxSecret, senderId, notificationActivityClass);
-
-    instance.oxManager.init(app, config, mOrchextraCompletionCallback);
   }
 
   public ArrayList<String> readReadArticles() {

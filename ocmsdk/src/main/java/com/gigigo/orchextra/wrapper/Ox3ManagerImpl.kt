@@ -9,7 +9,7 @@ import com.gigigo.orchextra.core.domain.actions.actionexecutors.customaction.Orc
 import com.gigigo.orchextra.core.domain.entities.Error
 import com.gigigo.orchextra.geofence.OxGeofenceImp
 import com.gigigo.orchextra.indoorpositioning.OxIndoorPositioningImp
-import com.gigigo.orchextra.wrapper.OxManager.CustomActionListener
+import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
 import com.gigigo.orchextra.wrapper.OxManager.ErrorListener
 import com.gigigo.orchextra.wrapper.OxManager.StatusListener
 import com.gigigo.orchextra.wrapper.OxManager.TokenReceiver
@@ -88,12 +88,16 @@ class Ox3ManagerImpl : OxManager {
     orchextra.getCrmManager().setDeviceData(null, businessUnits)
   }
 
-  override fun setCustomSchemeReceiver(customSchemeReceiver: CustomActionListener) {
+  override fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver) {
     orchextra.setCustomActionListener(object : OrchextraCustomActionListener {
       override fun onCustomSchema(customSchema: String) {
-        customSchemeReceiver.onCustomSchema(customSchema)
+        customSchemeReceiver.onReceive(customSchema)
       }
     })
+  }
+
+  override fun onCustomScheme(customScheme: String) {
+    TODO("not implemented")
   }
 
   companion object {

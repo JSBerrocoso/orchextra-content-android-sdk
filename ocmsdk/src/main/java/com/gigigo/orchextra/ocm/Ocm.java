@@ -2,7 +2,6 @@ package com.gigigo.orchextra.ocm;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
 import com.gigigo.orchextra.core.controller.model.home.ImageTransformReadArticle;
 import com.gigigo.orchextra.core.data.api.utils.ConnectionUtilsImp;
 import com.gigigo.orchextra.core.domain.entities.menus.DataRequest;
@@ -27,10 +26,9 @@ import java.util.Map;
 import jp.wasabeef.glide.transformations.GrayscaleTransformation;
 
 public final class Ocm {
-@Deprecated
-  public static void TestVimeoVideoFeature(final Context context, String access_token,
+  @Deprecated public static void TestVimeoVideoFeature(final Context context, String access_token,
       String VideoId) {
-  VimeoExoPlayerActivity.open(context, null);
+    VimeoExoPlayerActivity.open(context, null);
     VimeoBuilder builder = new VimeoBuilder(access_token);
     VimeoManager vmManager = new VimeoManager(builder);
     ConnectionUtilsImp conn = new ConnectionUtilsImp(context);
@@ -52,96 +50,19 @@ public final class Ocm {
   public static final String OCM_PREFERENCES = "OCMpreferencez";
   public static final String OCM_CHANGE_CREDENTIALS_DONE = "ChangeCredentialsDONE";
 
-  public static void initialize(Application app) {
-
-    OcmBuilder ocmBuilder = new OcmBuilder(app);
-    String oxKey = "FAKE_KEY";
-    String oxSecret = "FAKE_SECRET";
-    Class notificationActivityClass = ocmBuilder.getNotificationActivityClass();
-
-    //Initialization has to be done after setting callbacks because getting them could be null.
-    OCManager.initSdk(ocmBuilder.getApp());
-
-    OCManager.setContentLanguage(ocmBuilder.getContentLanguage());
-    OCManager.setDoRequiredLoginCallback(ocmBuilder.getOnRequiredLoginCallback());
-    OCManager.setEventCallback(ocmBuilder.getOnEventCallback());
-
-    OCManager.setShowReadArticles(ocmBuilder.getShowReadArticles());
-    if (ocmBuilder.getShowReadArticles() && ocmBuilder.getTransformReadArticleMode()
-        .equals(ImageTransformReadArticle.BITMAP_TRANSFORM)) {
-      if (ocmBuilder.getCustomBitmapTransformReadArticle() == null) {
-        OCManager.setBitmapTransformReadArticles(
-            new GrayscaleTransformation(app.getApplicationContext()));
-      } else {
-        OCManager.setBitmapTransformReadArticles(ocmBuilder.getCustomBitmapTransformReadArticle());
-      }
-    }
-
-    SharedPreferences prefs =
-        ocmBuilder.getApp().getSharedPreferences(OCM_PREFERENCES, Context.MODE_PRIVATE);
-    boolean IsCredentialsChanged = prefs.getBoolean(OCM_CHANGE_CREDENTIALS_DONE, false);
-
-    if (!IsCredentialsChanged) {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId());
-      start();
-    }
-  }
-
-  public static void initializeWithChangeCredentials(OcmBuilder ocmBuilder) {
-    String oxKey = "FAKE_KEY";
-    String oxSecret = "FAKE_SECRET";
-
-    Class notificationActivityClass = ocmBuilder.getNotificationActivityClass();
-
-    OCManager.initSdk(ocmBuilder.getApp());
-    OCManager.setContentLanguage(ocmBuilder.getContentLanguage());
-    OCManager.setDoRequiredLoginCallback(ocmBuilder.getOnRequiredLoginCallback());
-    OCManager.setEventCallback(ocmBuilder.getOnEventCallback());
-
-    OCManager.setShowReadArticles(ocmBuilder.getShowReadArticles());
-    if (ocmBuilder.getShowReadArticles() && ocmBuilder.getTransformReadArticleMode()
-        .equals(ImageTransformReadArticle.BITMAP_TRANSFORM)) {
-      if (ocmBuilder.getCustomBitmapTransformReadArticle() == null) {
-        OCManager.setBitmapTransformReadArticles(
-            new GrayscaleTransformation(ocmBuilder.getApp().getApplicationContext()));
-      } else {
-        OCManager.setBitmapTransformReadArticles(ocmBuilder.getCustomBitmapTransformReadArticle());
-      }
-    }
-    if (ocmBuilder.getShowReadArticles()) {
-      OCManager.setMaxReadArticles(ocmBuilder.getMaxReadArticles());
-    }
-
-    if (ocmBuilder.getVuforiaImpl() != null) {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId(), ocmBuilder.getVuforiaImpl());
-    } else {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId());
-    }
-
-    Ocm.start();
-  }
-
   /**
    * Initialize the sdk. This method must be initialized in the onCreate method of the Application
    * class
    */
-  public static void initialize(OcmBuilder ocmBuilder) {
-    System.out.println("appOn6.1");
+  public static void initialize(OcmBuilder ocmBuilder, OcmCredentialCallback onCredentialCallback) {
     Application app = ocmBuilder.getApp();
-    System.out.println("appOn6.1");
     String oxKey = ocmBuilder.getOxKey();
     String oxSecret = ocmBuilder.getOxSecret();
     Class notificationActivityClass = ocmBuilder.getNotificationActivityClass();
-    System.out.println("appOn6.2");
     OCManager.setContentLanguage(ocmBuilder.getContentLanguage());
     OCManager.setDoRequiredLoginCallback(ocmBuilder.getOnRequiredLoginCallback());
     OCManager.setEventCallback(ocmBuilder.getOnEventCallback());
-    System.out.println("appOn6.3");
     OCManager.initSdk(app);
-    System.out.println("appOn6.4");
     OCManager.setShowReadArticles(ocmBuilder.getShowReadArticles());
     if (ocmBuilder.getShowReadArticles() && ocmBuilder.getTransformReadArticleMode()
         .equals(ImageTransformReadArticle.BITMAP_TRANSFORM)) {
@@ -152,19 +73,17 @@ public final class Ocm {
         OCManager.setBitmapTransformReadArticles(ocmBuilder.getCustomBitmapTransformReadArticle());
       }
     }
-    System.out.println("appOn6.5");
+
     if (ocmBuilder.getShowReadArticles()) {
       OCManager.setMaxReadArticles(ocmBuilder.getMaxReadArticles());
     }
-    System.out.println("appOn6.6");
-    if (ocmBuilder.getVuforiaImpl() != null) {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId(), ocmBuilder.getVuforiaImpl());
-    } else {
-      OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass,
-          ocmBuilder.getOxSenderId());
-    }
-    System.out.println("appOn6.7");
+
+    OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass, ocmBuilder.getOxSenderId(),
+        ocmBuilder.getVuforiaImpl(), onCredentialCallback);
+  }
+
+  public static void getOxToken(final OcmCredentialCallback ocmCredentialCallback) {
+    OCManager.getOxToken(ocmCredentialCallback);
   }
 
   /**
@@ -279,20 +198,6 @@ public final class Ocm {
   }
 
   /**
-   * Start or restart the sdk with a new credentials
-   */
-  public static void startWithCredentials(String apiKey, String apiSecret,
-      OcmCredentialCallback onCredentialCallback) {
-    OCManager.setNewOrchextraCredentials(apiKey, apiSecret, onCredentialCallback);
-  }
-
-  public static void start(
-      OcmCredentialCallback onCredentialCallback) {
-    OCManager.start(onCredentialCallback);
-  }
-
-
-  /**
    * Set a business unit
    */
   public static void setBusinessUnit(String businessUnit) {
@@ -304,13 +209,6 @@ public final class Ocm {
    */
   public static void bindUser(CrmUser crmUser) {
     OCManager.bindUser(crmUser);
-  }
-
-  /**
-   * Start the sdk with the last provided credentials.
-   */
-  public static void start() {
-    OCManager.start();
   }
 
   public static void stop() {

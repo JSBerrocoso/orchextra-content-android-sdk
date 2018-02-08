@@ -1,6 +1,7 @@
 package com.gigigo.orchextra.wrapper
 
 import android.app.Application
+import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
 
 interface OxManager {
 
@@ -22,14 +23,12 @@ interface OxManager {
 
   fun setBusinessUnits(businessUnits: List<String>)
 
-  fun setCustomSchemeReceiver(customSchemeReceiver: CustomActionListener)
+  fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver)
+
+  fun onCustomScheme(customScheme: String)
 
   interface TokenReceiver {
     fun onGetToken(token: String)
-  }
-
-  interface CustomActionListener {
-    fun onCustomSchema(customSchema: String)
   }
 
   interface StatusListener {

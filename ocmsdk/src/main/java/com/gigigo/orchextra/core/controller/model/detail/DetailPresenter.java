@@ -40,7 +40,8 @@ public class DetailPresenter extends Presenter<DetailView> {
     CrmUser crmUser = new CrmUser(userId, null, null);
     Ocm.bindUser(crmUser);
     Ocm.setUserIsAuthorizated(true);
-    Ocm.start(new OcmCredentialCallback() {
+
+    Ocm.getOxToken(new OcmCredentialCallback() {
       @Override public void onCredentialReceiver(String accessToken) {
         if (!accessToken.equals(DetailPresenter.this.accessToken)) {
           DetailPresenter.this.accessToken = accessToken;
