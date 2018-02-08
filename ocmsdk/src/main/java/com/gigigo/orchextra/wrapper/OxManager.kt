@@ -1,7 +1,6 @@
 package com.gigigo.orchextra.wrapper
 
 import android.app.Application
-import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
 
 interface OxManager {
 
@@ -9,25 +8,37 @@ interface OxManager {
 
   fun startScanner()
 
-  fun init(app: Application, config: OxConfig, callback: OrchextraCompletionCallback)
+  fun init(application: Application, config: OxConfig, statusListener: StatusListener)
 
-  fun getToken()
+  fun finish()
 
-  fun bindUser(crmUser: CrmUser)
+  fun removeListeners()
 
-  fun unBindUser()
+  fun isReady(): Boolean
 
-  fun bindDevice(device: String)
+  fun getToken(tokenReceiver: TokenReceiver)
 
-  fun unBindDevice()
+  fun setErrorListener(errorListener: ErrorListener)
 
-  fun setOnCustomSchemeReceiver(onCustomSchemeReceiver: OnCustomSchemeReceiver)
+  fun setBusinessUnits(businessUnits: List<String>)
 
-  fun callOnCustomSchemeReceiver(customScheme: String)
+  fun setCustomSchemeReceiver(customSchemeReceiver: CustomActionListener)
 
-  fun start()
+  interface TokenReceiver {
+    fun onGetToken(token: String)
+  }
 
-  fun stop()
+  interface CustomActionListener {
+    fun onCustomSchema(customSchema: String)
+  }
 
-  fun updateSDKCredentials(apiKey: String, apiSecret: String, forceCallback: Boolean)
+  interface StatusListener {
+    fun isReady()
+
+    fun onError(error: String)
+  }
+
+  interface ErrorListener {
+    fun onError(error: String)
+  }
 }

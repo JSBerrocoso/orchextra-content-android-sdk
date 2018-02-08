@@ -1,20 +1,23 @@
 package com.gigigo.orchextra.wrapper
 
 import android.app.Application
-import android.util.Log
 import com.gigigo.orchextra.core.Orchextra
+import com.gigigo.orchextra.core.OrchextraErrorListener
 import com.gigigo.orchextra.core.OrchextraOptions
-import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
-
+import com.gigigo.orchextra.core.OrchextraStatusListener
+import com.gigigo.orchextra.core.domain.actions.actionexecutors.customaction.OrchextraCustomActionListener
+import com.gigigo.orchextra.core.domain.entities.Error
+import com.gigigo.orchextra.geofence.OxGeofenceImp
+import com.gigigo.orchextra.indoorpositioning.OxIndoorPositioningImp
+import com.gigigo.orchextra.wrapper.OxManager.CustomActionListener
+import com.gigigo.orchextra.wrapper.OxManager.ErrorListener
+import com.gigigo.orchextra.wrapper.OxManager.StatusListener
+import com.gigigo.orchextra.wrapper.OxManager.TokenReceiver
 
 class Ox3ManagerImpl : OxManager {
 
   private val orchextra = Orchextra
-  private lateinit var orchextraCompletionCallback: OrchextraCompletionCallback
-  private lateinit var app: Application
-  private var config = OxConfig()
   private val genders: HashMap<CrmUser.Gender, String> = HashMap()
-  private var onCustomSchemeReceiver: OnCustomSchemeReceiver? = null
 
   init {
     genders[CrmUser.Gender.GenderFemale] = "female"
@@ -22,64 +25,75 @@ class Ox3ManagerImpl : OxManager {
     genders[CrmUser.Gender.GenderND] = "nd"
   }
 
-  override fun startImageRecognition() = TODO("not implemented")
+  override fun startImageRecognition() = orchextra.openImageRecognition()
 
   override fun startScanner() = orchextra.openScanner()
 
-  override fun init(app: Application, config: OxConfig, callback: OrchextraCompletionCallback) {
+  override fun init(application: Application, config: OxConfig, statusListener: StatusListener) {
 
-    this.app = app
-    this.config = config
-    this.orchextraCompletionCallback = callback
-  }
+    orchextra.setStatusListener(object : OrchextraStatusListener {
+      override fun onStatusChange(isReady: Boolean) {
+        if (isReady) {
+          orchextra.getTriggerManager().geofence = OxGeofenceImp.create(application)
+          orchextra.getTriggerManager()
+              .indoorPositioning = OxIndoorPositioningImp.create(application)
 
-  override fun getToken() {
-    orchextra.getToken { oxToken -> orchextraCompletionCallback?.onConfigurationReceive(oxToken) }
-  }
+          config.notificationActivityClass?.let {
+            orchextra.setNotificationActivityClass(it)
+          }
 
-  override fun bindUser(crmUser: CrmUser) {
-    TODO("not implemented")
-  }
+          statusListener.isReady()
+        } else {
+          statusListener.onError("SDK isn't ready")
+        }
+      }
+    })
 
-  override fun unBindUser() {
-    TODO("not implemented")
-  }
+    orchextra.setErrorListener(object : OrchextraErrorListener {
+      override fun onError(error: Error) {
+        statusListener.onError(error.message)
+      }
+    })
 
-  override fun bindDevice(device: String) {
-    TODO("not implemented")
-  }
+    val options = OrchextraOptions.Builder().firebaseApiKey(config.firebaseApiKey)
+        .firebaseApplicationId(config.firebaseApplicationId)
+        .debuggable(true)
+        .build()
 
-  override fun unBindDevice() {
-    TODO("not implemented")
-  }
-
-  override fun setOnCustomSchemeReceiver(onCustomSchemeReceiver: OnCustomSchemeReceiver) {
-    this.onCustomSchemeReceiver = onCustomSchemeReceiver
-  }
-
-  override fun callOnCustomSchemeReceiver(customScheme: String) {
-    TODO("not implemented")
-  }
-
-  override fun start() {
-    Log.wtf(TAG, "Ox3ManagerImp#start()")
-  }
-
-  override fun stop() = orchextra.finish()
-
-  override fun updateSDKCredentials(apiKey: String, apiSecret: String, forceCallback: Boolean) {
-    config = config.copy(apiKey = apiKey, apiSecret = apiSecret)
-    initOx()
-  }
-
-  private fun initOx() {
-    val options = OrchextraOptions.Builder()
-        //.firebaseApiKey("AIzaSyDlMIjwx2r0oc0W7O4WPb7CvRhjCVHOZBk")
-        //.firebaseApplicationId("1:327008883283:android:5a0b51c3ef8892e0")
-        .debuggable(true).build()
-
-    orchextra.init(app, config.apiKey, config.apiSecret, options)
+    orchextra.init(application, config.apiKey, config.apiSecret, options)
     orchextra.setScanTime(30)
+  }
+
+  override fun finish() = orchextra.finish()
+
+  override fun removeListeners() = with(orchextra) {
+    removeStatusListener()
+    removeErrorListener()
+  }
+
+  override fun isReady(): Boolean = orchextra.isReady()
+
+  override fun getToken(tokenReceiver: TokenReceiver) =
+      orchextra.getToken { token -> tokenReceiver.onGetToken(token) }
+
+  override fun setErrorListener(errorListener: ErrorListener) {
+    orchextra.setErrorListener(object : OrchextraErrorListener {
+      override fun onError(error: Error) {
+        errorListener.onError(error.message)
+      }
+    })
+  }
+
+  override fun setBusinessUnits(businessUnits: List<String>) {
+    orchextra.getCrmManager().setDeviceData(null, businessUnits)
+  }
+
+  override fun setCustomSchemeReceiver(customSchemeReceiver: CustomActionListener) {
+    orchextra.setCustomActionListener(object : OrchextraCustomActionListener {
+      override fun onCustomSchema(customSchema: String) {
+        customSchemeReceiver.onCustomSchema(customSchema)
+      }
+    })
   }
 
   companion object {
