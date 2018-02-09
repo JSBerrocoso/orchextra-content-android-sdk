@@ -271,8 +271,11 @@ public final class OCManager {
   }
 
   static void bindUser(CrmUser crmUser) {
-    // TODO bind user
-    //instance.oxManager.bindUser(crmUser);
+    if (instance != null) {
+      instance.oxManager.bindUser(crmUser);
+    } else {
+      Log.e(TAG, "setErrorListener with null instance");
+    }
   }
 
   public static Map<String, String> getLocalStorage() {

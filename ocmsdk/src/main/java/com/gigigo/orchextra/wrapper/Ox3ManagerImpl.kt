@@ -1,12 +1,14 @@
 package com.gigigo.orchextra.wrapper
 
 import android.app.Application
+import android.util.Log
 import com.gigigo.orchextra.core.Orchextra
 import com.gigigo.orchextra.core.OrchextraErrorListener
 import com.gigigo.orchextra.core.OrchextraOptions
 import com.gigigo.orchextra.core.OrchextraStatusListener
 import com.gigigo.orchextra.core.domain.actions.actionexecutors.customaction.OrchextraCustomActionListener
 import com.gigigo.orchextra.core.domain.entities.Error
+import com.gigigo.orchextra.core.domain.entities.OxCRM
 import com.gigigo.orchextra.geofence.OxGeofenceImp
 import com.gigigo.orchextra.indoorpositioning.OxIndoorPositioningImp
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
@@ -90,6 +92,11 @@ class Ox3ManagerImpl : OxManager {
     orchextra.getCrmManager().setDeviceData(null, businessUnits)
   }
 
+  override fun bindUser(crmUser: CrmUser) {
+    val crm = OxCRM(crmUser.crmId, crmUser.gender.name, crmUser.birthdate.time)
+    orchextra.getCrmManager().bindUser(crm)
+  }
+
   override fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver) {
     orchextra.setCustomActionListener(object : OrchextraCustomActionListener {
       override fun onCustomSchema(customSchema: String) {
@@ -99,7 +106,7 @@ class Ox3ManagerImpl : OxManager {
   }
 
   override fun onCustomScheme(customScheme: String) {
-    TODO("not implemented")
+    Log.e(TAG, "onCustomScheme not implemented")
   }
 
   companion object {

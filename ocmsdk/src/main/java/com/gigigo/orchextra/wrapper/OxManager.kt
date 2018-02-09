@@ -23,6 +23,8 @@ interface OxManager {
 
   fun setBusinessUnits(businessUnits: List<String>)
 
+  fun bindUser(crmUser: CrmUser)
+
   fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver)
 
   fun onCustomScheme(customScheme: String)
