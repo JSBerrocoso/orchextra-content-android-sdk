@@ -17,11 +17,14 @@ import com.gigigo.orchextra.ocm.views.UiDetailBaseContentData;
 import com.gigigo.orchextra.ocm.views.UiGridBaseContentData;
 import com.gigigo.orchextra.ocm.views.UiSearchBaseContentData;
 import com.gigigo.orchextra.wrapper.CrmUser;
+import com.gigigo.orchextra.wrapper.OxManager;
 import gigigo.com.vimeolibs.VimeoBuilder;
 import gigigo.com.vimeolibs.VimeoCallback;
 import gigigo.com.vimeolibs.VimeoExoPlayerActivity;
 import gigigo.com.vimeolibs.VimeoInfo;
 import gigigo.com.vimeolibs.VimeoManager;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.annotations.Nullable;
 import java.util.Map;
 import jp.wasabeef.glide.transformations.GrayscaleTransformation;
 
@@ -50,11 +53,16 @@ public final class Ocm {
   public static final String OCM_PREFERENCES = "OCMpreferencez";
   public static final String OCM_CHANGE_CREDENTIALS_DONE = "ChangeCredentialsDONE";
 
+  public static void initialize(OcmBuilder ocmBuilder) {
+
+  }
+
   /**
    * Initialize the sdk. This method must be initialized in the onCreate method of the Application
    * class
    */
-  public static void initialize(OcmBuilder ocmBuilder, OcmCredentialCallback onCredentialCallback) {
+  public static void initialize(@NonNull OcmBuilder ocmBuilder,
+      @Nullable OcmCredentialCallback onCredentialCallback) {
     Application app = ocmBuilder.getApp();
     String oxKey = ocmBuilder.getOxKey();
     String oxSecret = ocmBuilder.getOxSecret();
@@ -84,6 +92,10 @@ public final class Ocm {
 
   public static void getOxToken(final OcmCredentialCallback ocmCredentialCallback) {
     OCManager.getOxToken(ocmCredentialCallback);
+  }
+
+  public static void setErrorListener(final OxManager.ErrorListener errorListener) {
+    OCManager.setErrorListener(errorListener);
   }
 
   /**

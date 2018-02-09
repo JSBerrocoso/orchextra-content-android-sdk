@@ -210,27 +210,24 @@ public class MainActivity extends AppCompatActivity {
   //endregion
 
   private void startCredentials() {
-    Ocm.startWithCredentials(BuildConfig.API_KEY, BuildConfig.API_SECRET,
-        new OcmCredentialCallback() {
-          @Override public void onCredentialReceiver(String accessToken) {
-            //TODO Fix in Orchextra
-            runOnUiThread(new Runnable() {
-              @Override public void run() {
-                getContent();
-              }
-            });
-          }
 
-          @Override public void onCredentailError(String code) {
-            Snackbar.make(tabLayout,
-                "No Internet Connection: " + code + "\n check Credentials-Enviroment",
-                Snackbar.LENGTH_INDEFINITE).show();
-          }
-        });
+    Ocm.setErrorListener(
+        error -> Snackbar.make(tabLayout, "Error: " + error, Snackbar.LENGTH_INDEFINITE).show());
 
     Ocm.setOnCustomSchemeReceiver(
         customScheme -> Toast.makeText(MainActivity.this, customScheme, Toast.LENGTH_SHORT).show());
-    Ocm.start();
+
+    Ocm.getOxToken(new OcmCredentialCallback() {
+      @Override public void onCredentialReceiver(String accessToken) {
+        getContent();
+      }
+
+      @Override public void onCredentailError(String code) {
+        Snackbar.make(tabLayout,
+            "No Internet Connection: " + code + "\n check Credentials-Enviroment",
+            Snackbar.LENGTH_INDEFINITE).show();
+      }
+    });
   }
 
   public void clearApplicationData() {

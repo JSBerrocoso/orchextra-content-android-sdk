@@ -53,6 +53,7 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import orchextra.javax.inject.Inject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public final class OCManager {
 
@@ -415,7 +416,7 @@ Add Comment C
 
   static void initOrchextra(String oxKey, String oxSecret, Class notificationActivityClass,
       String senderId, ImageRecognition vuforia,
-      final OcmCredentialCallback ocmCredentialCallback) {
+      @Nullable final OcmCredentialCallback ocmCredentialCallback) {
 
     if (OCManager.instance != null) {
 
@@ -424,11 +425,15 @@ Add Comment C
 
       instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
         @Override public void isReady() {
-          instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+          if (ocmCredentialCallback != null) {
+            instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+          }
         }
 
         @Override public void onError(@NotNull String error) {
-          ocmCredentialCallback.onCredentailError(error);
+          if (ocmCredentialCallback != null) {
+            ocmCredentialCallback.onCredentailError(error);
+          }
         }
       });
     }
@@ -436,6 +441,10 @@ Add Comment C
 
   public static void getOxToken(final OcmCredentialCallback ocmCredentialCallback) {
     instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+  }
+
+  public static void setErrorListener(final OxManager.ErrorListener errorListener) {
+    instance.oxManager.setErrorListener(errorListener);
   }
 
   //region cookies FedexAuth

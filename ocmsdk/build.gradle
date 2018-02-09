@@ -193,6 +193,7 @@ dependencies {
   //Dagger
   implementation project.libraries.dagger
   annotationProcessor project.libraries.daggerCompiler
+  implementation project.libraries.loggingInterceptor
 
   //Image Loader Glide/Blur
   api project.libraries.imageloaderGlideBlur
@@ -213,7 +214,6 @@ dependencies {
   stagingImplementation project.libraries.oxScannerStaging
   debugImplementation project.libraries.oxScannerDebug
   releaseImplementation project.libraries.oxScannerRelease
-
 
   api project.libraries.doubleViewPager
   api project.libraries.autofitTextView
