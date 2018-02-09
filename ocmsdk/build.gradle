@@ -172,6 +172,9 @@ install.dependsOn(ocmsdk: build)
 
 
 dependencies {
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+
   //TEST
   testImplementation project.testLibraries.junit
   testImplementation project.testLibraries.mockito
@@ -179,16 +182,16 @@ dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar']) //youtube
 
   //google Support/CustomTabs/playServices
-  api project.libraries.androidSupportDesign
-  api project.libraries.androidCustomtabs
+  implementation project.libraries.androidSupportDesign
+  implementation project.libraries.androidCustomtabs
 
-  api project.libraries.playServicesBase
-  api project.libraries.playServicesLocation
-  api project.libraries.playServicesGcm
+  implementation project.libraries.playServicesBase
+  implementation project.libraries.playServicesLocation
+  implementation project.libraries.playServicesGcm
 
   //gigigo Lib
-  api project.libraries.ggglib
-  api project.libraries.gggJavaLib
+  implementation project.libraries.ggglib
+  implementation project.libraries.gggJavaLib
 
   //Dagger
   implementation project.libraries.dagger
@@ -196,7 +199,7 @@ dependencies {
   implementation project.libraries.loggingInterceptor
 
   //Image Loader Glide/Blur
-  api project.libraries.imageloaderGlideBlur
+  implementation project.libraries.imageloaderGlideBlur
 
   // ORCHEXTRA
   stagingImplementation project.libraries.oxCoreStaging
@@ -215,22 +218,22 @@ dependencies {
   debugImplementation project.libraries.oxScannerDebug
   releaseImplementation project.libraries.oxScannerRelease
 
-  api project.libraries.doubleViewPager
-  api project.libraries.autofitTextView
-  api project.libraries.multipleGridRecyclerView
+  implementation project.libraries.doubleViewPager
+  implementation project.libraries.autofitTextView
+  implementation project.libraries.multipleGridRecyclerView
 
 
-  api project.libraries.rxAndroid
-  api project.libraries.rxJava
-  api project.libraries.rxRetrofit
-  api project.libraries.arrow
+  implementation project.libraries.rxAndroid
+  implementation project.libraries.rxJava
+  implementation project.libraries.rxRetrofit
+  implementation project.libraries.arrow
 
-  api project.libraries.kache
+  implementation project.libraries.kache
 
 
-  api project.libraries.gpuImage //4 readarticles
+  implementation project.libraries.gpuImage //4 readarticles
 
-  api project(':vimeosdk')
+  implementation project(':vimeosdk')
 
   //TEST
   testImplementation project.testLibraries.junit

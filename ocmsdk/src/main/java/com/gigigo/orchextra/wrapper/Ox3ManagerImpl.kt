@@ -10,6 +10,7 @@ import com.gigigo.orchextra.core.domain.entities.Error
 import com.gigigo.orchextra.geofence.OxGeofenceImp
 import com.gigigo.orchextra.indoorpositioning.OxIndoorPositioningImp
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
+import com.gigigo.orchextra.scanner.OxScannerImp
 import com.gigigo.orchextra.wrapper.OxManager.ErrorListener
 import com.gigigo.orchextra.wrapper.OxManager.StatusListener
 import com.gigigo.orchextra.wrapper.OxManager.TokenReceiver
@@ -34,6 +35,7 @@ class Ox3ManagerImpl : OxManager {
     orchextra.setStatusListener(object : OrchextraStatusListener {
       override fun onStatusChange(isReady: Boolean) {
         if (isReady) {
+          orchextra.getTriggerManager().scanner = OxScannerImp.create(application)
           orchextra.getTriggerManager().geofence = OxGeofenceImp.create(application)
           orchextra.getTriggerManager()
               .indoorPositioning = OxIndoorPositioningImp.create(application)

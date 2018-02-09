@@ -6,6 +6,7 @@ project.ext {
   androidTargetSdkVersion = 26
   supportVersion = '26.1.0'
   oxVersion = '3.0-RC17'
+  playVersion = '11.0.4' //11.4.2
 
   libraries = [androidSupportDesign      : "com.android.support:design:${supportVersion}",
                androidCustomtabs         : "com.android.support:customtabs:${supportVersion}",
@@ -34,9 +35,9 @@ project.ext {
                oxScannerRelease          : "com.gigigo.orchextra:scanner:${oxVersion}",
 
                gpuImage                  : 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1',
-               playServicesBase          : "com.google.android.gms:play-services-base:11.4.2",
-               playServicesLocation      : "com.google.android.gms:play-services-location:11.4.2",
-               playServicesGcm           : "com.google.android.gms:play-services-gcm:11.4.2",
+               playServicesBase          : "com.google.android.gms:play-services-base:${playVersion}",
+               playServicesLocation      : "com.google.android.gms:play-services-location:${playVersion}",
+               playServicesGcm           : "com.google.android.gms:play-services-gcm:${playVersion}",
 
                imageloaderGlideBlur      : 'com.github.Gigigo-Android-Devs.gigigo-imageLoader-library-android:imageloader-glide-blur:2.01',
 
