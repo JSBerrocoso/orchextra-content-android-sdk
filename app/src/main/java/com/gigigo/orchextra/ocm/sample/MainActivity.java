@@ -7,13 +7,19 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+import com.gigigo.orchextra.core.controller.model.home.ImageTransformReadArticle;
 import com.gigigo.orchextra.core.domain.entities.menus.DataRequest;
 import com.gigigo.orchextra.ocm.Ocm;
+import com.gigigo.orchextra.ocm.OcmBuilder;
 import com.gigigo.orchextra.ocm.OcmCallbacks;
+import com.gigigo.orchextra.ocm.OcmEvent;
+import com.gigigo.orchextra.ocm.OcmStyleUiBuilder;
 import com.gigigo.orchextra.ocm.callbacks.OcmCredentialCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnChangedMenuCallback;
+import com.gigigo.orchextra.ocm.callbacks.OnEventCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnLoadContentSectionFinishedCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnRequiredLoginCallback;
 import com.gigigo.orchextra.ocm.customProperties.Disabled;
@@ -34,6 +40,7 @@ import kotlin.jvm.functions.Function1;
 
 public class MainActivity extends AppCompatActivity {
 
+  private static final String TAG = "MainActivity";
   private TabLayout tabLayout;
   private ViewPager viewpager;
   private ScreenSlidePagerAdapter adapter;
@@ -150,11 +157,6 @@ public class MainActivity extends AppCompatActivity {
         }
       }
     });
-
-    //ReadedArticles
-    //if (OCManager.getShowReadArticles() && adapter != null) {
-    //  adapter.reloadSections();
-    //}
   }
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     Ocm.setOnDoRequiredLoginCallback(onDoRequiredLoginCallback);
     Ocm.setCustomBehaviourDelegate(customPropertiesDelegate);
 
-    startCredentials();
+    initOx();
   }
 
   private void initViews() {
@@ -207,9 +209,8 @@ public class MainActivity extends AppCompatActivity {
     viewpager.setAdapter(adapter);
     viewpager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
   }
-  //endregion
 
-  private void startCredentials() {
+  private void initOx() {
 
     Ocm.setErrorListener(
         error -> Snackbar.make(tabLayout, "Error: " + error, Snackbar.LENGTH_INDEFINITE).show());
@@ -217,15 +218,32 @@ public class MainActivity extends AppCompatActivity {
     Ocm.setOnCustomSchemeReceiver(
         customScheme -> Toast.makeText(MainActivity.this, customScheme, Toast.LENGTH_SHORT).show());
 
-    Ocm.getOxToken(new OcmCredentialCallback() {
+    OcmBuilder ocmBuilder =
+        new OcmBuilder(getApplication()).setNotificationActivityClass(MainActivity.class)
+            .setShowReadArticles(true)
+            .setTransformReadArticleMode(ImageTransformReadArticle.BITMAP_TRANSFORM)
+            .setMaxReadArticles(100)
+            .setOrchextraCredentials(BuildConfig.API_KEY, BuildConfig.API_SECRET)
+            .setContentLanguage("EN")
+            .setOnEventCallback(onEventCallback);
+
+    Ocm.initialize(ocmBuilder, new OcmCredentialCallback() {
       @Override public void onCredentialReceiver(String accessToken) {
+        OcmStyleUiBuilder ocmStyleUiBuilder =
+            new OcmStyleUiBuilder().setTitleFont("fonts/Gotham-Ultra.ttf")
+                .setNormalFont("fonts/Gotham-Book.ttf")
+                .setMediumFont("fonts/Gotham-Medium.ttf")
+                .setTitleToolbarEnabled(false)
+                .setEnabledStatusBar(false);
+        Ocm.setStyleUi(ocmStyleUiBuilder);
+
+        Ocm.setBusinessUnit(BuildConfig.BUSSINES_UNIT);
+
         getContent();
       }
 
       @Override public void onCredentailError(String code) {
-        Snackbar.make(tabLayout,
-            "No Internet Connection: " + code + "\n check Credentials-Enviroment",
-            Snackbar.LENGTH_INDEFINITE).show();
+        Log.e(TAG, "Error on init Ox");
       }
     });
   }
@@ -365,4 +383,12 @@ public class MainActivity extends AppCompatActivity {
 
     tabLayout.addOnTabSelectedListener(onTabSelectedListener);
   }
+
+  private OnEventCallback onEventCallback = new OnEventCallback() {
+    @Override public void doEvent(OcmEvent event, Object data) {
+    }
+
+    @Override public void doEvent(OcmEvent event) {
+    }
+  };
 }

@@ -37,7 +37,7 @@ import com.gigigo.orchextra.ocm.views.UiGridBaseContentData;
 import com.gigigo.orchextra.ocm.views.UiSearchBaseContentData;
 import com.gigigo.orchextra.wrapper.CrmUser;
 import com.gigigo.orchextra.wrapper.ImageRecognition;
-import com.gigigo.orchextra.wrapper.OrchextraCompletionCallback;
+import com.gigigo.orchextra.wrapper.Ox3ManagerImpl;
 import com.gigigo.orchextra.wrapper.OxConfig;
 import com.gigigo.orchextra.wrapper.OxManager;
 import java.io.File;
@@ -57,91 +57,10 @@ import org.jetbrains.annotations.Nullable;
 
 public final class OCManager {
 
+  private static String TAG = "OCManager";
   private static OCManager instance;
-  private static OrchextraCompletionCallback mOrchextraCompletionCallback =
-      new OrchextraCompletionCallback() {
-        @Override public void onSuccess() {
-          Log.d("OCM", "Orchextra initialized successfully");
-        }
-
-        @Override public void onError(String error) {
-          Log.d("OCM", "onError: " + error);
-          //new Handler(Looper.getMainLooper()).post(new Runnable() {
-          //  @Override public void run() {
-          //    Toast.makeText(mApplication, "onError:  app" + error, Toast.LENGTH_LONG).show();
-          //  }
-          //});
-          //performance for use ox3 we need to change the old code error of ox2.0 401 becomes 2000 now x example
-          /*
-          NoDatabase:{
-       code:1100,
-       message:'No database connection'
-   },
-   InvalidCredentials:{
-       code:2001,
-       statusCode: 403,
-       message:'Invalid credentials supplied'
-   },
-   Unauthorized:{
-       code:2002,
-       statusCode: 401,
-       message:'Unauthorized'
-   },
-   ProjectNotFound:{
-       code:2000,
-       statusCode: 404,
-       message:'Project not found'
-   },
-   InvalidJSON:{
-       code:2003,
-       statusCode: 400,
-       message:'Invalid JSON body',
-       conversion: err =>
-           err.name == 'SyntaxError'
-           && (err.message.indexOf('Unexpected token')===0
-           || err.message.indexOf('Unexpected string in JSON')===0)
-   },
-   ValidationError:{
-       code:3000,
-       statusCode: 400,
-       message: 'Validation Error',
-Add Comment C
-           */
-
-          //asv in ox 1.0 && ox 2.0 invalid credentials/or invalid enviroment(credentials from pro in stagign endpoint
-          //was 401, in this case the ox onError must be throw to ocm credentials callback
-          //in ox 3.0 the back error code will be 2000, for the same problem
-          if ((error.equals("401") || error.equals("2000"))
-              && instance.ocmCredentialCallback != null) {
-            instance.ocmCredentialCallback.onCredentailError(error);
-          }
-        }
-
-        @Override public void onInit(String s) {
-          Log.d("OCM", "onInit: " + s);
-          //asvox aki es cuando se va a background , en estepunto ox ya ha recuperado la config anterior(buena)
-          //y cuando llega a onSuccess se rompio del todo
-
-        }
-
-        @Override public void onConfigurationReceive(String accessToken) {
-          Log.d("OCM", "onConfigurationReceive: " + accessToken);
-          //new Handler(Looper.getMainLooper()).post(new Runnable() {
-          //  @Override public void run() {
-          //    Toast.makeText(mApplication, "onConfigurationReceive:  app" + accessToken, Toast.LENGTH_LONG).show();
-          //  }
-          //});
-          instance.oxSession.setToken(accessToken);
-
-          if (instance.ocmCredentialCallback
-              != null) { //asv esto indica q se hace el changecredentials
-            instance.ocmCredentialCallback.onCredentialReceiver(accessToken);
-          }
-        }
-      };
-  //region serialize list of read articles slugs
   private final String READ_ARTICLES_FILE = "read_articles_file.ocm";
-  @Inject OxManager oxManager;
+  private final OxManager oxManager;
   @Inject OcmContextProvider ocmContextProvider;
   @Inject OcmViewGenerator ocmViewGenerator;
   @Inject OxSession oxSession;
@@ -161,8 +80,20 @@ Add Comment C
   private UiMenu uiMenuToNotifyWhenSectionIsLoaded;
   private boolean isShowReadedArticles = false;
   private int maxReadArticles = 100;
-  //public static int transform = -1;
   private com.bumptech.glide.load.Transformation<Bitmap> readArticlesBitmapTransform;
+
+  public static synchronized OCManager getInstance() {
+    if (instance != null) {
+      return instance;
+    }
+
+    instance = new OCManager();
+    return instance;
+  }
+
+  private OCManager() {
+    this.oxManager = new Ox3ManagerImpl();
+  }
 
   static void initSdk(Application application) {
     getInstance().initOcm(application);
@@ -329,10 +260,14 @@ Add Comment C
 
   static void setOrchextraBusinessUnit(String businessUnit) {
 
-    List<String> businessUnits = new ArrayList<>();
-    businessUnits.add(businessUnit);
+    if (instance != null) {
+      List<String> businessUnits = new ArrayList<>();
+      businessUnits.add(businessUnit);
 
-    instance.oxManager.setBusinessUnits(businessUnits);
+      instance.oxManager.setBusinessUnits(businessUnits);
+    } else {
+      Log.e(TAG, "setErrorListener with null instance");
+    }
   }
 
   static void bindUser(CrmUser crmUser) {
@@ -405,15 +340,6 @@ Add Comment C
 
   //endregion
 
-  public static synchronized OCManager getInstance() {
-    if (instance != null) {
-      return instance;
-    }
-
-    instance = new OCManager();
-    return instance;
-  }
-
   static void initOrchextra(String oxKey, String oxSecret, Class notificationActivityClass,
       String senderId, ImageRecognition vuforia,
       @Nullable final OcmCredentialCallback ocmCredentialCallback) {
@@ -426,7 +352,10 @@ Add Comment C
       instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
         @Override public void isReady() {
           if (ocmCredentialCallback != null) {
-            instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+            instance.oxManager.getToken(token -> {
+              ocmCredentialCallback.onCredentialReceiver(token);
+              instance.oxSession.setToken(token);
+            });
           }
         }
 
@@ -440,11 +369,19 @@ Add Comment C
   }
 
   public static void getOxToken(final OcmCredentialCallback ocmCredentialCallback) {
-    instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+    if (instance != null) {
+      instance.oxManager.getToken(ocmCredentialCallback::onCredentialReceiver);
+    } else {
+      Log.e(TAG, "setErrorListener with null instance");
+    }
   }
 
   public static void setErrorListener(final OxManager.ErrorListener errorListener) {
-    instance.oxManager.setErrorListener(errorListener);
+    if (instance != null) {
+      instance.oxManager.setErrorListener(errorListener);
+    } else {
+      Log.e(TAG, "setErrorListener with null instance");
+    }
   }
 
   //region cookies FedexAuth

@@ -53,10 +53,6 @@ public final class Ocm {
   public static final String OCM_PREFERENCES = "OCMpreferencez";
   public static final String OCM_CHANGE_CREDENTIALS_DONE = "ChangeCredentialsDONE";
 
-  public static void initialize(OcmBuilder ocmBuilder) {
-
-  }
-
   /**
    * Initialize the sdk. This method must be initialized in the onCreate method of the Application
    * class
