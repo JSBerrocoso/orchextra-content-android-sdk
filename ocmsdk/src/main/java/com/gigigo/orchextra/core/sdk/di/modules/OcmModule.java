@@ -29,15 +29,15 @@ import orchextra.javax.inject.Singleton;
     this.app = app;
   }
 
-  @Singleton @Provides OcmContextProvider provideOcmContextProvider() {
-    return new OcmContextProviderImpl(app.getApplicationContext());
+  @Singleton @Provides OcmContextProvider provideOcmContextProvider(
+      OcmSdkLifecycle ocmSdkLifecycle) {
+    return new OcmContextProviderImpl(app.getApplicationContext(), ocmSdkLifecycle);
   }
 
-  @Singleton @Provides OcmSdkLifecycle provideOcmSdkLifecycle(OcmContextProvider ocmContextProvider,
-      PriorityScheduler priorityScheduler) {
-    OcmSdkLifecycle ocmSdkLifecycle = new OcmSdkLifecycle(priorityScheduler);
+  @Singleton @Provides OcmSdkLifecycle provideOcmSdkLifecycle(PriorityScheduler priorityScheduler) {
 
-    ocmContextProvider.setOcmActivityLifecycle(ocmSdkLifecycle);
+    OcmSdkLifecycle ocmSdkLifecycle = new OcmSdkLifecycle(priorityScheduler);
+    app.registerActivityLifecycleCallbacks(ocmSdkLifecycle);
 
     return ocmSdkLifecycle;
   }

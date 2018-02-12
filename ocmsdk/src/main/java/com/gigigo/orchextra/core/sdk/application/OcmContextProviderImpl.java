@@ -20,25 +20,28 @@ package com.gigigo.orchextra.core.sdk.application;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 public class OcmContextProviderImpl implements OcmContextProvider {
 
+  private static final String TAG = "OcmContextProviderImpl";
   private final Context context;
-  private OcmSdkLifecycle ocmSdkLifecycle;
+  private final OcmSdkLifecycle ocmSdkLifecycle;
 
-  public OcmContextProviderImpl(Context context) {
+  public OcmContextProviderImpl(Context context, OcmSdkLifecycle ocmSdkLifecycle) {
     this.context = context;
-  }
-
-  @Override public void setOcmActivityLifecycle(OcmSdkLifecycle ocmSdkLifecycle) {
     this.ocmSdkLifecycle = ocmSdkLifecycle;
   }
 
-  //region context provider interface
   @Override public Activity getCurrentActivity() {
     if (ocmSdkLifecycle == null) {
       return null;
     }
+
+    if (ocmSdkLifecycle.getCurrentActivity() == null) {
+      Log.e(TAG, "ocmSdkLifecycle.getCurrentActivity() == null");
+    }
+
     return ocmSdkLifecycle.getCurrentActivity();
   }
 
@@ -46,7 +49,6 @@ public class OcmContextProviderImpl implements OcmContextProvider {
     if (ocmSdkLifecycle == null) {
       return false;
     }
-    //this implementation gives context of paused and stop activities
     return ocmSdkLifecycle.isActivityContextAvailable();
   }
 
@@ -57,6 +59,4 @@ public class OcmContextProviderImpl implements OcmContextProvider {
   @Override public boolean isApplicationContextAvailable() {
     return (context != null);
   }
-
-  //endregion
 }

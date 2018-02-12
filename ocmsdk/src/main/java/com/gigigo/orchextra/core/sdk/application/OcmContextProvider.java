@@ -21,5 +21,5 @@ package com.gigigo.orchextra.core.sdk.application;
 import com.gigigo.ggglib.ContextProvider;
 
 public interface OcmContextProvider extends ContextProvider {
-  void setOcmActivityLifecycle(OcmSdkLifecycle ocmSdkLifecycle);
+
 }
