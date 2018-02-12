@@ -17,7 +17,7 @@ public interface OCManagerCallbacks {
     void onVersionFails(Throwable e);
   }
   interface Menus {
-    void onMenusLoaded(UiMenuData menus);
+    void onMenusLoaded(UiMenuData menus, boolean hasChanged);
     void onMenusFails(Throwable e);
   }
 

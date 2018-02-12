@@ -180,13 +180,14 @@ Add Comment C
   static void setEventCallback(OnEventCallback onEventCallback) {
     getInstance().onEventCallback = onEventCallback;
   }
+  /*
 
   static void getMenus(DataRequest menuRequest, final OCManagerCallbacks.Menus menusCallback) {
     final long time = System.currentTimeMillis();
     if (instance != null) {
       instance.ocmViewGenerator.getMenu(menuRequest,
           new OcmViewGenerator.GetMenusViewGeneratorCallback() {
-            @Override public void onGetMenusLoaded(UiMenuData menus) {
+            @Override public void onGetMenusLoaded(UiMenuData menus, boolean hasChanged) {
               Log.v("TT - LOADED menus", (System.currentTimeMillis() - time) / 1000 + "");
               if (menus != null
                   && menus.getUiMenuList() != null
@@ -194,7 +195,7 @@ Add Comment C
                 instance.uiMenuToNotifyWhenSectionIsLoaded = menus.getUiMenuList().get(0);
               }
 
-              menusCallback.onMenusLoaded(menus);
+              menusCallback.onMenusLoaded(menus, hasChanged);
             }
 
             @Override public void onGetMenusFails(Throwable e) {
@@ -203,12 +204,13 @@ Add Comment C
           });
     }
   }
+  */
 
   static void updateContent(final OCManagerCallbacks.Menus menusCallback) {
     final long time = System.currentTimeMillis();
     if (instance != null) {
       instance.ocmViewGenerator.updateContent(new OcmViewGenerator.GetMenusViewGeneratorCallback() {
-            @Override public void onGetMenusLoaded(UiMenuData menus) {
+            @Override public void onGetMenusLoaded(UiMenuData menus, boolean hasChanged) {
               Log.v("TT - LOADED menus", (System.currentTimeMillis() - time) / 1000 + "");
               if (menus != null
                   && menus.getUiMenuList() != null
@@ -216,7 +218,7 @@ Add Comment C
                 instance.uiMenuToNotifyWhenSectionIsLoaded = menus.getUiMenuList().get(0);
               }
 
-              menusCallback.onMenusLoaded(menus);
+              menusCallback.onMenusLoaded(menus, hasChanged);
             }
 
             @Override public void onGetMenusFails(Throwable e) {

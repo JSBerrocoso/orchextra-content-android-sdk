@@ -231,14 +231,19 @@ public class MainActivity extends AppCompatActivity {
   private void getContentKt() {
     Ocm.setOnLoadDataContentSectionFinished(new OnLoadContentSectionFinishedCallback() {
       @Override public void onLoadContentSectionFinished() {
-
+        Toast.makeText(MainActivity.this, "onLoadContentSectionFinished", Toast.LENGTH_SHORT).show();
       }
     });
 
     Ocm.updateContent(new OcmCallbacks.Menus() {
-      @Override public void onMenusLoaded(UiMenuData menus) {
-        Toast.makeText(MainActivity.this, menus.toString(), Toast.LENGTH_SHORT).show();
-        onGoDetailView(menus.getUiMenuList());
+      @Override public void onMenusLoaded(UiMenuData menus, boolean hasChanged) {
+        if(menus != null) {
+          Toast.makeText(MainActivity.this, menus.toString(), Toast.LENGTH_SHORT).show();
+          onGoDetailView(menus.getUiMenuList());
+          if (hasChanged) {
+            showIconNewContent(menus.getUiMenuList());
+          }
+        }
       }
 
       @Override public void onMenusFails(Throwable e) {
@@ -247,6 +252,8 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
+
+  /*
   private void getContent() {
     Ocm.setOnLoadDataContentSectionFinished(new OnLoadContentSectionFinishedCallback() {
       @Override public void onLoadContentSectionFinished() {
@@ -319,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
       }
     });
   }
+*/
 
   private boolean checkIfMenuHasChanged(List<UiMenu> oldUiMenuList, List<UiMenu> newUiMenuList) {
     if (oldUiMenuList == null || newUiMenuList == null) {

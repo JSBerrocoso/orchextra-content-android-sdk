@@ -62,7 +62,7 @@ public class OcmViewGeneratorImp implements OcmViewGenerator {
       final GetMenusViewGeneratorCallback getMenusViewGeneratorCallback) {
     ocmController.getMenu(menuRequest, new OcmController.GetMenusControllerCallback() {
       @Override public void onGetMenusLoaded(UiMenuData menus) {
-        getMenusViewGeneratorCallback.onGetMenusLoaded(menus);
+        //getMenusViewGeneratorCallback.onGetMenusLoaded(menus);
       }
 
       @Override public void onGetMenusFails(Exception e) {
@@ -73,8 +73,8 @@ public class OcmViewGeneratorImp implements OcmViewGenerator {
 
   @Override public void updateContent(final GetMenusViewGeneratorCallback getMenusViewGeneratorCallback) {
     ocmControllerKt.updateContent(new OcmControllerKt.GetMenusControllerCallback() {
-      @Override public void onMenusLoaded(UiMenuData menus) {
-        getMenusViewGeneratorCallback.onGetMenusLoaded(menus);
+      @Override public void onMenusLoaded(UiMenuData menus, boolean hasChanged) {
+        getMenusViewGeneratorCallback.onGetMenusLoaded(menus, hasChanged);
       }
 
       @Override public void onMenusFails(Exception e) {

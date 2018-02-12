@@ -184,10 +184,11 @@ public final class Ocm {
   /**
    * Get the app menus
    */
+  /*
   public static void getMenus(DataRequest menuRequest, OcmCallbacks.Menus menusCallback) {
     OCManager.getMenus(menuRequest, new OCManagerCallbacks.Menus() {
-      @Override public void onMenusLoaded(UiMenuData menus) {
-        menusCallback.onMenusLoaded(menus);
+      @Override public void onMenusLoaded(UiMenuData menus, boolean hasChanged) {
+        menusCallback.onMenusLoaded(menus, hasChanged);
       }
 
       @Override public void onMenusFails(Throwable e) {
@@ -195,11 +196,11 @@ public final class Ocm {
       }
     });
   }
-
+*/
   public static void updateContent(OcmCallbacks.Menus menusCallback) {
     OCManager.updateContent(new OCManagerCallbacks.Menus() {
-      @Override public void onMenusLoaded(UiMenuData menus) {
-        menusCallback.onMenusLoaded(menus);
+      @Override public void onMenusLoaded(UiMenuData menus, boolean hasChanged) {
+        menusCallback.onMenusLoaded(menus, hasChanged);
       }
 
       @Override public void onMenusFails(Throwable e) {

@@ -15,7 +15,7 @@ public interface OcmCallbacks {
   }
 
   interface Menus {
-    void onMenusLoaded(UiMenuData menus);
+    void onMenusLoaded(UiMenuData menus, boolean hasChanged);
     void onMenusFails(Throwable e);
   }
 

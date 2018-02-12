@@ -21,7 +21,7 @@ interface OcmControllerKt {
   }
 
   interface GetMenusControllerCallback {
-    fun onMenusLoaded(uiMenuData: UiMenuData?)
+    fun onMenusLoaded(uiMenuData: UiMenuData?, hasChanged: Boolean)
     fun onMenusFails(exception: Exception)
   }
 

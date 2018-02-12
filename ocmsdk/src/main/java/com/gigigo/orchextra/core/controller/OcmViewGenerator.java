@@ -39,7 +39,7 @@ public interface OcmViewGenerator {
 
   // Callbacks
   interface GetMenusViewGeneratorCallback {
-    void onGetMenusLoaded(UiMenuData menus);
+    void onGetMenusLoaded(UiMenuData menus, boolean hasChanged);
 
     void onGetMenusFails(Throwable e);
   }
