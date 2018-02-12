@@ -93,7 +93,7 @@ class Ox3ManagerImpl : OxManager {
   }
 
   override fun bindUser(crmUser: CrmUser) {
-    val crm = OxCRM(crmUser.crmId, crmUser.gender.name, crmUser.birthdate.time)
+    val crm = OxCRM(crmUser.crmId, crmUser.gender?.name, crmUser.birthdate?.time)
     orchextra.getCrmManager().bindUser(crm)
   }
 
