@@ -166,6 +166,8 @@ public final class OCManager {
           clearCallback.onDataClearFails(e);
         }
       });
+    } else {
+      clearCallback.onDataClearFails(new Exception("instance != null"));
     }
   }
 
