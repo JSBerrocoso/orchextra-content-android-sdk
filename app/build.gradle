@@ -84,6 +84,9 @@ android {
       dimension "sample"
     }
 
+    woah_RO {
+      dimension "sample"
+    }
 
     woah_IT {
       dimension "sample"
