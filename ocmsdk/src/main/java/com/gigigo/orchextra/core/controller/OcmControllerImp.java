@@ -235,29 +235,6 @@ public class OcmControllerImp implements OcmController {
         PriorityScheduler.Priority.HIGH);
   }
 
-  private void checkVersionChangedAndRequestSection(String contentUrl, int imagesToDownload,
-      GetSectionControllerCallback getSectionControllerCallback) {
-
-    getSection.execute(new SectionObserver(new GetSectionControllerCallback() {
-          @Override public void onGetSectionLoaded(ContentData contentData) {
-            if (getSectionControllerCallback!= null) {
-              if (!contentData.isFromCloud()) {
-                getSectionControllerCallback.onGetSectionLoaded(contentData);
-              } else {
-                getSectionControllerCallback.onGetSectionLoaded(null);
-              }
-            }
-          }
-
-          @Override public void onGetSectionFails(Exception e) {
-            if (getSectionControllerCallback!= null) {
-              getSectionControllerCallback.onGetSectionFails(e);
-            }
-          }
-        }), GetSection.Params.forSection(true, contentUrl, imagesToDownload),
-        PriorityScheduler.Priority.HIGH);
-  }
-
   private void retrieveSectionOnlyFromCache(String contentUrl, int imagesToDownload,
       GetSectionControllerCallback getSectionControllerCallback) {
 

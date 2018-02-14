@@ -201,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
             //TODO Fix in Orchextra
             runOnUiThread(new Runnable() {
               @Override public void run() {
-                getContentKt();
+                getContent();
               }
             });
           }
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
     return copyList;
   }
 
-  private void getContentKt() {
+  private void getContent() {
     Ocm.setOnLoadDataContentSectionFinished(new OnLoadContentSectionFinishedCallback() {
       @Override public void onLoadContentSectionFinished() {
         Toast.makeText(MainActivity.this, "onLoadContentSectionFinished", Toast.LENGTH_SHORT).show();
@@ -251,82 +251,6 @@ public class MainActivity extends AppCompatActivity {
       }
     });
   }
-
-
-  /*
-  private void getContent() {
-    Ocm.setOnLoadDataContentSectionFinished(new OnLoadContentSectionFinishedCallback() {
-      @Override public void onLoadContentSectionFinished() {
-        Toast.makeText(MainActivity.this, "LLega", Toast.LENGTH_LONG).show();
-
-        //if (!oldUiMenuData.isFromCloud()) {
-        Ocm.getMenus(DataRequest.FIRST_CACHE, new OcmCallbacks.Menus() {
-          @Override public void onMenusLoaded(UiMenuData newUiMenuData) {
-            List<UiMenu> newUiMenuList = newUiMenuData.getUiMenuList();
-            if (newUiMenuList == null) {
-              return;
-            }
-
-            boolean menuHasChanged = checkIfMenuHasChanged(oldUiMenuList, newUiMenuList);
-            if (menuHasChanged) {
-              showIconNewContent(newUiMenuList);
-            }
-
-            oldUiMenuList = copy(newUiMenuList);
-          }
-
-          @Override public void onMenusFails(Throwable e) {
-
-          }
-        });
-        //}
-      }
-    });
-
-    Ocm.getMenus(DataRequest.ONLY_CACHE, new OcmCallbacks.Menus() {
-      @Override public void onMenusLoaded(final UiMenuData oldUiMenuData) {
-        if (oldUiMenuData == null) {
-          Ocm.getMenus(DataRequest.FORCE_CLOUD, new OcmCallbacks.Menus() {
-            @Override public void onMenusLoaded(UiMenuData newUiMenuData) {
-              if (oldUiMenuList == null) {
-                onGoDetailView(newUiMenuData.getUiMenuList());
-                return;
-              }
-
-              List<UiMenu> newUiMenuList = newUiMenuData.getUiMenuList();
-              if (newUiMenuList == null) {
-                return;
-              }
-
-              boolean menuHasChanged = checkIfMenuHasChanged(oldUiMenuList, newUiMenuList);
-              if (menuHasChanged) {
-                showIconNewContent(newUiMenuList);
-              }
-              oldUiMenuList = copy(newUiMenuList);
-            }
-
-            @Override public void onMenusFails(Throwable e) {
-
-            }
-          });
-        } else {
-          oldUiMenuList = copy(oldUiMenuData.getUiMenuList());
-
-          if (oldUiMenuList == null) {
-            Toast.makeText(MainActivity.this, "menu is null", Toast.LENGTH_SHORT).show();
-            return;
-          }
-
-          onGoDetailView(oldUiMenuList);
-        }
-      }
-
-      @Override public void onMenusFails(Throwable e) {
-        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-      }
-    });
-  }
-*/
 
   private boolean checkIfMenuHasChanged(List<UiMenu> oldUiMenuList, List<UiMenu> newUiMenuList) {
     if (oldUiMenuList == null || newUiMenuList == null) {

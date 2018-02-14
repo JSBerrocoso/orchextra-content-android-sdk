@@ -60,14 +60,6 @@ public class ContentViewPresenter extends Presenter<ContentView> {
     loadSection(false, uiMenu, filter, false);
   }
 
-  public void loadSection(UiMenu uiMenu) {
-    loadSection(false, uiMenu, filter, false);
-  }
-
-  public void loadSection(boolean forceReload) {
-    loadSection(forceReload, uiMenu, filter, false);
-  }
-
   public void loadSection(UiMenu uiMenu, String filter) {
     loadSection(false, uiMenu, filter, false);
   }
