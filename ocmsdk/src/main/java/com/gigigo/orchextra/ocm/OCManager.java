@@ -266,7 +266,15 @@ public final class OCManager {
       List<String> businessUnits = new ArrayList<>();
       businessUnits.add(businessUnit);
 
-      instance.oxManager.setBusinessUnits(businessUnits);
+      instance.oxManager.setBusinessUnits(businessUnits, new OxManager.StatusListener() {
+        @Override public void onSuccess() {
+
+        }
+
+        @Override public void onError(@NotNull String error) {
+
+        }
+      });
     } else {
       Log.e(TAG, "setErrorListener with null instance");
     }
@@ -274,7 +282,15 @@ public final class OCManager {
 
   static void bindUser(CrmUser crmUser) {
     if (instance != null) {
-      instance.oxManager.bindUser(crmUser);
+      instance.oxManager.bindUser(crmUser, new OxManager.StatusListener() {
+        @Override public void onSuccess() {
+
+        }
+
+        @Override public void onError(@NotNull String error) {
+
+        }
+      });
     } else {
       Log.e(TAG, "setErrorListener with null instance");
     }
@@ -355,7 +371,7 @@ public final class OCManager {
       OxConfig oxConfig = new OxConfig(oxKey, oxSecret, "", "", notificationActivityClass);
 
       instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
-        @Override public void isReady() {
+        @Override public void onSuccess() {
           if (ocmCredentialCallback != null) {
             instance.oxManager.getToken(token -> {
               ocmCredentialCallback.onCredentialReceiver(token);

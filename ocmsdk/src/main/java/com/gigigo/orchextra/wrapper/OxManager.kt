@@ -21,9 +21,9 @@ interface OxManager {
 
   fun setErrorListener(errorListener: ErrorListener)
 
-  fun setBusinessUnits(businessUnits: List<String>)
+  fun setBusinessUnits(businessUnits: List<String>, statusListener: StatusListener)
 
-  fun bindUser(crmUser: CrmUser)
+  fun bindUser(crmUser: CrmUser, statusListener: StatusListener)
 
   fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver)
 
@@ -34,7 +34,7 @@ interface OxManager {
   }
 
   interface StatusListener {
-    fun isReady()
+    fun onSuccess()
 
     fun onError(error: String)
   }

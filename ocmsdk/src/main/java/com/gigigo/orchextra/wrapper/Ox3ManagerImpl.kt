@@ -46,7 +46,7 @@ class Ox3ManagerImpl : OxManager {
             orchextra.setNotificationActivityClass(it)
           }
 
-          statusListener.isReady()
+          statusListener.onSuccess()
         } else {
           statusListener.onError("SDK isn't ready")
         }
@@ -88,13 +88,17 @@ class Ox3ManagerImpl : OxManager {
     })
   }
 
-  override fun setBusinessUnits(businessUnits: List<String>) {
-    orchextra.getCrmManager().setDeviceData(null, businessUnits)
+  override fun setBusinessUnits(businessUnits: List<String>, statusListener: StatusListener) {
+    orchextra.getCrmManager().setDeviceData(null, businessUnits, {
+      statusListener.onSuccess()
+    })
   }
 
-  override fun bindUser(crmUser: CrmUser) {
+  override fun bindUser(crmUser: CrmUser, statusListener: StatusListener) {
     val crm = OxCRM(crmUser.crmId, crmUser.gender?.name, crmUser.birthdate?.time)
-    orchextra.getCrmManager().bindUser(crm)
+    orchextra.getCrmManager().bindUser(crm, {
+      statusListener.onSuccess()
+    })
   }
 
   override fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver) {
