@@ -29,6 +29,7 @@ import com.gigigo.orchextra.ocm.customProperties.ViewLayer;
 import com.gigigo.orchextra.ocm.customProperties.ViewType;
 import com.gigigo.orchextra.ocm.dto.UiMenu;
 import com.gigigo.orchextra.ocm.dto.UiMenuData;
+import com.gigigo.orchextra.wrapper.OxManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -237,7 +238,15 @@ public class MainActivity extends AppCompatActivity {
                 .setEnabledStatusBar(false);
         Ocm.setStyleUi(ocmStyleUiBuilder);
 
-        Ocm.setBusinessUnit(BuildConfig.BUSSINES_UNIT);
+        Ocm.setBusinessUnit(BuildConfig.BUSSINES_UNIT, new OxManager.StatusListener() {
+          @Override public void onSuccess() {
+            
+          }
+
+          @Override public void onError(String error) {
+
+          }
+        });
 
         getContent();
       }

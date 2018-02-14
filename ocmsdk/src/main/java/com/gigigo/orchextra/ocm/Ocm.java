@@ -208,15 +208,15 @@ public final class Ocm {
   /**
    * Set a business unit
    */
-  public static void setBusinessUnit(String businessUnit) {
-    OCManager.setOrchextraBusinessUnit(businessUnit);
+  public static void setBusinessUnit(String businessUnit, OxManager.StatusListener statusListener) {
+    OCManager.setOrchextraBusinessUnit(businessUnit, statusListener);
   }
 
   /**
    * Set a custom app user
    */
-  public static void bindUser(CrmUser crmUser) {
-    OCManager.bindUser(crmUser);
+  public static void bindUser(CrmUser crmUser, OxManager.StatusListener statusListener) {
+    OCManager.bindUser(crmUser, statusListener);
   }
 
   public static void stop() {

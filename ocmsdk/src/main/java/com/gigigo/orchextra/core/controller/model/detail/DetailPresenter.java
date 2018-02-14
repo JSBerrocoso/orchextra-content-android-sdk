@@ -6,6 +6,8 @@ import com.gigigo.orchextra.ocm.callbacks.OcmCredentialCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnFinishViewListener;
 import com.gigigo.orchextra.ocm.views.UiDetailBaseContentData;
 import com.gigigo.orchextra.wrapper.CrmUser;
+import com.gigigo.orchextra.wrapper.OxManager;
+import org.jetbrains.annotations.NotNull;
 
 public class DetailPresenter extends Presenter<DetailView> {
 
@@ -38,7 +40,15 @@ public class DetailPresenter extends Presenter<DetailView> {
   public void setLoginUserFromNativeLogin(String userId) {
 
     CrmUser crmUser = new CrmUser(userId, null, null);
-    Ocm.bindUser(crmUser);
+    Ocm.bindUser(crmUser, new OxManager.StatusListener() {
+      @Override public void onSuccess() {
+
+      }
+
+      @Override public void onError(@NotNull String error) {
+
+      }
+    });
     Ocm.setUserIsAuthorizated(true);
 
     Ocm.getOxToken(new OcmCredentialCallback() {

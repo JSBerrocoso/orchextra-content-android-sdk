@@ -260,37 +260,22 @@ public final class OCManager {
     }
   }
 
-  static void setOrchextraBusinessUnit(String businessUnit) {
+  static void setOrchextraBusinessUnit(String businessUnit,
+      OxManager.StatusListener statusListener) {
 
     if (instance != null) {
       List<String> businessUnits = new ArrayList<>();
       businessUnits.add(businessUnit);
 
-      instance.oxManager.setBusinessUnits(businessUnits, new OxManager.StatusListener() {
-        @Override public void onSuccess() {
-
-        }
-
-        @Override public void onError(@NotNull String error) {
-
-        }
-      });
+      instance.oxManager.setBusinessUnits(businessUnits, statusListener);
     } else {
       Log.e(TAG, "setErrorListener with null instance");
     }
   }
 
-  static void bindUser(CrmUser crmUser) {
+  static void bindUser(CrmUser crmUser, OxManager.StatusListener statusListener) {
     if (instance != null) {
-      instance.oxManager.bindUser(crmUser, new OxManager.StatusListener() {
-        @Override public void onSuccess() {
-
-        }
-
-        @Override public void onError(@NotNull String error) {
-
-        }
-      });
+      instance.oxManager.bindUser(crmUser, statusListener);
     } else {
       Log.e(TAG, "setErrorListener with null instance");
     }
