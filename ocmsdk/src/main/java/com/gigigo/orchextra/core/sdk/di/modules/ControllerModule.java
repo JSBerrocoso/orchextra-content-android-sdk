@@ -39,11 +39,12 @@ import orchextra.javax.inject.Singleton;
   }
 
   @Provides OcmControllerKt provideOcmControllerKt(GetVersion getVersion, GetMenus getMenus,
-      GetSection getSection, OcmPreferences ocmPreferences) {
+      GetSection getSection, GetDetail getDetail, ConnectionUtils connectionUtils,
+      OcmPreferences ocmPreferences) {
 
-    return new OcmControllerImpKt(getVersion, getMenus, getSection, ocmPreferences);
+    return new OcmControllerImpKt(getVersion, getMenus, getSection, getDetail, connectionUtils,
+        ocmPreferences);
   }
-
 
   @Provides @Singleton ThreadExecutor provideThreadExecutor(JobExecutor jobExecutor) {
     return jobExecutor;

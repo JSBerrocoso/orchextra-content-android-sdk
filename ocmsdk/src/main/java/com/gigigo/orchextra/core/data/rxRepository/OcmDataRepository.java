@@ -92,8 +92,8 @@ import orchextra.javax.inject.Singleton;
     return updateAt > current;
   }
 
-  @Override public Observable<ElementData> getDetail(boolean forceReload, String elementUrl) {
-    OcmDataStore ocmDataStore = ocmDataStoreFactory.getDataStoreForDetail(forceReload, elementUrl);
+  @Override public Observable<ElementData> getDetail(DataRequest forceSource, String elementUrl) {
+    OcmDataStore ocmDataStore = ocmDataStoreFactory.getDataStoreForDetail(forceSource, elementUrl);
     return ocmDataStore.getElementById(elementUrl).map(apiElementDataMapper::externalClassToModel);
   }
 

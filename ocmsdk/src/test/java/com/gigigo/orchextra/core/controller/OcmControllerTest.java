@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
         new OcmControllerImp(mockGetVersion,mockGetMenus, mockGetSection, mockGetDetail, mockSearchElements,
             mockClearCache, mockConnectionUtils, mockOcmPreferences);
     ocmControllerKt =
-        new OcmControllerImpKt(mockGetVersion,mockGetMenus, mockGetSection, mockOcmPreferences);
+        new OcmControllerImpKt(mockGetVersion,mockGetMenus, mockGetSection, mockGetDetail, mockOcmPreferences);
   }
 
   @Test public void testClearCache() {

@@ -20,7 +20,7 @@ public interface OcmRepository {
   Observable<ContentData> getSectionElements(DataRequest forceSource, String elementUrl,
       int numberOfElementsToDownload);
 
-  Observable<ElementData> getDetail(boolean forceReload, String section);
+  Observable<ElementData> getDetail(DataRequest forceSource, String section);
 
   Observable<ContentData> doSearch(String textToSearch);
 

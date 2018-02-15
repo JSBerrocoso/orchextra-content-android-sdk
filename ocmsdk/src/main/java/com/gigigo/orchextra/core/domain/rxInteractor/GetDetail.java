@@ -1,5 +1,6 @@
 package com.gigigo.orchextra.core.domain.rxInteractor;
 
+import com.gigigo.orchextra.core.domain.entities.DataRequest;
 import com.gigigo.orchextra.core.domain.entities.elements.ElementData;
 import com.gigigo.orchextra.core.domain.rxExecutor.PostExecutionThread;
 import com.gigigo.orchextra.core.domain.rxRepository.OcmRepository;
@@ -21,21 +22,21 @@ public class GetDetail extends UseCase<ElementData, GetDetail.Params> {
   }
 
   @Override Observable<ElementData> buildUseCaseObservable(Params params) {
-    return this.ocmRepository.getDetail(params.forceReload, params.slug);
+    return this.ocmRepository.getDetail(params.forceSource, params.slug);
   }
 
   public static final class Params {
 
-    private final boolean forceReload;
+    private final DataRequest forceSource;
     private final String slug;
 
-    private Params(boolean forceReload, String slug) {
-      this.forceReload = forceReload;
+    private Params(DataRequest forceSource, String slug) {
+      this.forceSource = forceSource;
       this.slug = slug;
     }
 
-    public static Params forDetail(boolean forceReload, String slug) {
-      return new Params(forceReload, slug);
+    public static Params forDetail(DataRequest forceSource, String slug) {
+      return new Params(forceSource, slug);
     }
   }
 }

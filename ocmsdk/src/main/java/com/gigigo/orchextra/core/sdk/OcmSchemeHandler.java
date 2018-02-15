@@ -3,6 +3,7 @@ package com.gigigo.orchextra.core.sdk;
 import android.text.TextUtils;
 import android.widget.ImageView;
 import com.gigigo.orchextra.core.domain.OcmController;
+import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCacheRender;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCacheType;
@@ -24,15 +25,17 @@ public class OcmSchemeHandler {
 
   private final OcmContextProvider contextProvider;
   private final OcmController ocmController;
+  private final OcmControllerKt ocmControllerKt;
   private final ActionHandler actionHandler;
   private final Authoritation authoritation;
   private String elementURL;
   private String processElementURL;
 
-  public OcmSchemeHandler(OcmContextProvider contextProvider, OcmController ocmController,
+  public OcmSchemeHandler(OcmContextProvider contextProvider, OcmController ocmController, OcmControllerKt ocmControllerKt,
       ActionHandler actionHandler, Authoritation authoritation) {
     this.contextProvider = contextProvider;
     this.ocmController = ocmController;
+    this.ocmControllerKt = ocmControllerKt;
     this.actionHandler = actionHandler;
     this.authoritation = authoritation;
   }
@@ -81,8 +84,8 @@ public class OcmSchemeHandler {
     }
 
     String finalElementUri = elementUri;
-    ocmController.getDetails(elementUri, new OcmController.GetDetailControllerCallback() {
-      @Override public void onGetDetailLoaded(ElementCache elementCache) {
+    ocmControllerKt.getDetail(elementUri, new OcmControllerKt.GetDetailControllerCallback() {
+      @Override public void onDetailLoaded(ElementCache elementCache) {
         if (elementCache != null) {
           if (elementRequiredUserToBeLogged(elementCache)) {
             // Save url of the element that require login
@@ -95,11 +98,11 @@ public class OcmSchemeHandler {
         }
       }
 
-      @Override public void onGetDetailFails(Exception e) {
+      @Override public void onDetailFails(Exception e) {
         e.printStackTrace();
       }
 
-      @Override public void onGetDetailNoAvailable(Exception e) {
+      @Override public void onDetailNoAvailable(Exception e) {
         e.printStackTrace();
       }
     });

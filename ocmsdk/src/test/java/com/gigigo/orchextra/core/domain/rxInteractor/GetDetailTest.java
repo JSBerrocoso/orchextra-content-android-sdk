@@ -1,5 +1,6 @@
 package com.gigigo.orchextra.core.domain.rxInteractor;
 
+import com.gigigo.orchextra.core.domain.entities.DataRequest;
 import com.gigigo.orchextra.core.domain.rxExecutor.PostExecutionThread;
 import com.gigigo.orchextra.core.domain.rxRepository.OcmRepository;
 import org.junit.Before;
@@ -16,7 +17,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class) public class GetDetailTest {
 
-  private static final boolean FORCE_RELOAD = false;
+  private static final DataRequest FORCE_RELOAD = DataRequest.DEFAULT;
   private static final String FAKE_DETAIL = "FAKE_DETAIL";
 
   private GetDetail getDetail;

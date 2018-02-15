@@ -296,7 +296,7 @@ public class OcmControllerImp implements OcmController {
       GetDetailControllerCallback getDetailControllerCallback) {
     String slug = getSlug(elementUrl);
     getDetail.execute(new DetailObserver(getDetailControllerCallback),
-        GetDetail.Params.forDetail(false, slug), PriorityScheduler.Priority.HIGH);
+        GetDetail.Params.forDetail(com.gigigo.orchextra.core.domain.entities.DataRequest.DEFAULT, slug), PriorityScheduler.Priority.HIGH);
   }
 
   @Override

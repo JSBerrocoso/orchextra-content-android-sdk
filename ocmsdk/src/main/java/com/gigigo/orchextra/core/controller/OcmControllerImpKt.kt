@@ -1,23 +1,32 @@
 package com.gigigo.orchextra.core.controller
 
-import android.util.Log
+import com.gigigo.orchextra.core.data.rxException.ApiDetailNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiMenuNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiSectionNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiVersionNotFoundException
+import com.gigigo.orchextra.core.data.rxException.NetworkConnectionException
 import com.gigigo.orchextra.core.domain.OcmControllerKt
+import com.gigigo.orchextra.core.domain.OcmControllerKt.GetDetailControllerCallback
 import com.gigigo.orchextra.core.domain.OcmControllerKt.GetMenusControllerCallback
 import com.gigigo.orchextra.core.domain.OcmControllerKt.GetSectionControllerCallback
+import com.gigigo.orchextra.core.domain.entities.DataRequest.DEFAULT
 import com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CACHE
 import com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CLOUD
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentData
-import com.gigigo.orchextra.core.domain.entities.elements.Element
+import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache
+import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCacheType
+import com.gigigo.orchextra.core.domain.entities.elements.ElementData
 import com.gigigo.orchextra.core.domain.entities.menus.MenuContentData
 import com.gigigo.orchextra.core.domain.entities.version.VersionData
 import com.gigigo.orchextra.core.domain.rxInteractor.DefaultObserver
+import com.gigigo.orchextra.core.domain.rxInteractor.GetDetail
 import com.gigigo.orchextra.core.domain.rxInteractor.GetMenus
 import com.gigigo.orchextra.core.domain.rxInteractor.GetSection
 import com.gigigo.orchextra.core.domain.rxInteractor.GetVersion
+import com.gigigo.orchextra.core.domain.rxInteractor.PriorityScheduler
 import com.gigigo.orchextra.core.domain.rxInteractor.PriorityScheduler.Priority.HIGH
+import com.gigigo.orchextra.core.domain.utils.ConnectionUtils
+import com.gigigo.orchextra.core.sdk.utils.DateUtils
 import com.gigigo.orchextra.core.sdk.utils.OcmPreferences
 import com.gigigo.orchextra.ocm.OCManager
 import com.gigigo.orchextra.ocm.dto.UiMenu
@@ -29,6 +38,8 @@ class OcmControllerImpKt(
     private val getVersion: GetVersion,
     private val getMenus: GetMenus,
     private val getSection: GetSection,
+    private val getDetail: GetDetail,
+    private val connectionUtils: ConnectionUtils,
     private val ocmPreferences: OcmPreferences) : OcmControllerKt {
 
   lateinit var menuCallback: GetMenusControllerCallback
@@ -104,7 +115,7 @@ class OcmControllerImpKt(
           //DISPLAY NEW CONTENT AVAILABLE BUTTON
           menuCallback.onMenusLoaded(uiMenuData, true)
 
-          if(noCachedMenuData(cachedMenuData)) {
+          if (noCachedMenuData(cachedMenuData)) {
             loadSections(uiMenuData,
                 onLoaded = {
                   menuCallback.onMenusLoaded(uiMenuData, true)
@@ -134,8 +145,8 @@ class OcmControllerImpKt(
     }), GetMenus.Params.forForceSource(FORCE_CLOUD), HIGH)
   }
 
-  private fun noCachedMenuData(cachedMenuData: UiMenuData?) : Boolean =
-    cachedMenuData == null || cachedMenuData.uiMenuList == null || cachedMenuData.uiMenuList.isEmpty()
+  private fun noCachedMenuData(cachedMenuData: UiMenuData?): Boolean =
+      cachedMenuData == null || cachedMenuData.uiMenuList == null || cachedMenuData.uiMenuList.isEmpty()
 
   private fun menusHasChanged(cachedMenuData: UiMenuData?, uiMenuData: UiMenuData?): Boolean {
     return uiMenuData?.uiMenuList?.equals(cachedMenuData?.uiMenuList) == false
@@ -151,8 +162,8 @@ class OcmControllerImpKt(
       menu.elementCache.render.contentUrl?.let { content ->
         loadSection(content, imagesToDownload,
             onLoaded = {
-              reached ++
-              if(reached == menuSize) {
+              reached++
+              if (reached == menuSize) {
                 onLoaded()
                 OCManager.notifyOnLoadDataContentSectionFinished(menu)
               }
@@ -220,34 +231,41 @@ class OcmControllerImpKt(
   }
 
   private fun sectionHasChanged(cachedSectionData: ContentData?,
-      contentData: ContentData?): Boolean {
-    val cachedElements = cachedSectionData?.content?.elements ?: emptyList()
-    val newElements = contentData?.content?.elements ?: emptyList()
+      contentData: ContentData?): Boolean = ((cachedSectionData?.version != contentData?.version) || DateUtils.isAfterCurrentDate(
+      contentData?.expiredAt))
 
-    when {
-      cachedElements.size != newElements.size -> return true
-      else -> for ((index, cachedElement) in cachedElements.withIndex()) {
-        var newElement = newElements[index]
-        if (!cachedElement.slug.equals(newElement.slug, true)) {
-          return true
-        } else {
-          val cachedElementCache = cachedSectionData?.elementsCache?.get(cachedElement.elementUrl)
-          val newElementCache = contentData?.elementsCache?.get(newElement.elementUrl)
 
-          if (cachedElementCache?.updateAt != newElementCache?.updateAt) {
-            return true
-          }
-        }
-      }
+  private fun getSlug(elementUrl: String): String? {
+    try {
+      return elementUrl.substring(elementUrl.lastIndexOf("/") + 1, elementUrl.length)
+    } catch (ignored: Exception) {
+      return null
     }
+  }
 
-    return false
+  override fun getDetail(elementUrl: String,
+      getDetailControllerCallback: GetDetailControllerCallback) {
+    val slug = getSlug(elementUrl)
+    getDetail.execute(DetailObserver(object : GetDetailObserverCallback {
+      override fun onDetailLoaded(elementData: ElementData) {
+        if (!connectionUtils.hasConnection() && (elementData.element.type == ElementCacheType.WEBVIEW || elementData.element.type == ElementCacheType.VIDEO)) {
+          getDetailControllerCallback?.onDetailNoAvailable(NetworkConnectionException())
+        } else {
+          getDetailControllerCallback?.onDetailLoaded(elementData.element)
+        }
+
+        getDetailControllerCallback.onDetailLoaded(elementData.element)
+      }
+
+      override fun onDetailFails(exception: Exception) {
+        getDetailControllerCallback.onDetailFails(exception)
+      }
+    }),
+        GetDetail.Params.forDetail(DEFAULT, slug), PriorityScheduler.Priority.HIGH)
   }
 
   companion object {
     fun transformMenu(menuContentData: MenuContentData?): UiMenuData {
-
-      val time = System.currentTimeMillis()
 
       val uiMenuData = UiMenuData()
 
@@ -283,8 +301,6 @@ class OcmControllerImpKt(
 
       uiMenuData.uiMenuList = menuList
 
-      Log.v("TT - UiMenuData", ((System.currentTimeMillis() - time) / 1000).toString() + "")
-
       return uiMenuData
     }
   }
@@ -298,9 +314,9 @@ class VersionObserver(
     getVersionControllerCallback?.onVersionLoaded(versionData)
   }
 
-  override fun onError(e: Throwable) {
-    getVersionControllerCallback?.onVersionFails(ApiVersionNotFoundException(e))
-    e.printStackTrace()
+  override fun onError(exception: Throwable) {
+    getVersionControllerCallback?.onVersionFails(ApiVersionNotFoundException(exception))
+    exception.printStackTrace()
   }
 }
 
@@ -315,9 +331,9 @@ class MenuObserver(
     getMenusCallback?.onMenusLoaded(OcmControllerImpKt.transformMenu(menuContentData))
   }
 
-  override fun onError(e: Throwable) {
-    getMenusCallback?.onMenusFails(ApiMenuNotFoundException(e))
-    e.printStackTrace()
+  override fun onError(exception: Throwable) {
+    getMenusCallback?.onMenusFails(ApiMenuNotFoundException(exception))
+    exception.printStackTrace()
   }
 }
 
@@ -332,12 +348,26 @@ class SectionObserver(
     getSectionObserverCallback?.onSectionLoaded(contentData)
   }
 
-  override fun onError(e: Throwable) {
-    getSectionObserverCallback?.onSectionFails(ApiSectionNotFoundException(e))
-    e.printStackTrace()
+  override fun onError(exception: Throwable) {
+    getSectionObserverCallback?.onSectionFails(ApiSectionNotFoundException(exception))
+    exception.printStackTrace()
   }
 }
 
+class DetailObserver(
+    private val getDetailObserverCallback: GetDetailObserverCallback?) : DefaultObserver<ElementData>() {
+
+  override fun onNext(elementData: ElementData) {
+    getDetailObserverCallback?.onDetailLoaded(elementData)
+  }
+
+  override fun onComplete() {}
+
+  override fun onError(exception: Throwable) {
+    getDetailObserverCallback?.onDetailFails(ApiDetailNotFoundException(exception))
+    exception.printStackTrace()
+  }
+}
 
 interface GetVersionObserverCallback {
   fun onVersionLoaded(versionData: VersionData)
@@ -352,4 +382,9 @@ interface GetMenusObserverCallback {
 interface GetSectionObserverCallback {
   fun onSectionLoaded(contentData: ContentData?)
   fun onSectionFails(exception: Exception)
+}
+
+interface GetDetailObserverCallback {
+  fun onDetailLoaded(elementData: ElementData)
+  fun onDetailFails(e: Exception)
 }
