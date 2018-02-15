@@ -9,6 +9,7 @@ import com.gigigo.orchextra.core.controller.dto.CellGridContentData;
 import com.gigigo.orchextra.core.controller.model.base.Presenter;
 import com.gigigo.orchextra.core.controller.model.home.UpdateAtType;
 import com.gigigo.orchextra.core.domain.OcmController;
+import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentData;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentItem;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentItemPattern;
@@ -23,14 +24,18 @@ import com.gigigo.orchextra.ocm.OCManager;
 import com.gigigo.orchextra.ocm.OcmEvent;
 import com.gigigo.orchextra.ocm.customProperties.ViewType;
 import com.gigigo.orchextra.ocm.dto.UiMenu;
+import com.gigigo.orchextra.ocm.dto.UiMenuData;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ContentViewPresenter extends Presenter<ContentView> {
 
   private final Authoritation authoritation;
   private final OcmController ocmController;
+  private final OcmControllerKt ocmControllerKt;
 
   private UiMenu uiMenu;
   private int imagesToDownload = 21;
@@ -40,9 +45,10 @@ public class ContentViewPresenter extends Presenter<ContentView> {
   private boolean hasToCheckNewContent = false;
   private int padding;
 
-  public ContentViewPresenter(OcmController ocmController, Authoritation authoritation) {
+  public ContentViewPresenter(OcmController ocmController, OcmControllerKt ocmControllerKt, Authoritation authoritation) {
 
     this.ocmController = ocmController;
+    this.ocmControllerKt = ocmControllerKt;
     this.authoritation = authoritation;
   }
 
@@ -65,85 +71,31 @@ public class ContentViewPresenter extends Presenter<ContentView> {
   }
 
   public void loadSectionAndNotifyMenu() {
-    loadSection(true, uiMenu, filter, true);
-  }
+    ocmControllerKt.updateContent(new OcmControllerKt.GetMenusControllerCallback() {
+      @Override public void onMenusLoaded(@Nullable UiMenuData uiMenuData, boolean hasChanged) {
+        /*
+        if(menus != null) {
+          Toast.makeText(MainActivity.this, menus.toString(), Toast.LENGTH_SHORT).show();
+          onGoDetailView(menus.getUiMenuList());
+          if (hasChanged) {
+            showIconNewContent(menus.getUiMenuList());
+          }
+        }
+        */
+      }
 
-  public void loadSection(boolean forceReload, UiMenu uiMenu, String filter,
-      boolean reloadFromPullToRefresh) {
-    this.uiMenu = uiMenu;
-    this.filter = filter;
+      @Override public void onMenusFails(@NotNull Exception exception) {
+        //Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+      }
+    });
 
-    String contentUrl = uiMenu.getElementCache().getRender().getContentUrl();
-
-    /**
-     * Init app
-     * Get from cache == Force = false
-     * If section is null, then request from cloud and show content
-     * else request from cloud, check version and checkNewContent
-     *
-     * Pull to refresh
-     * force = true
-     * Get section from cloud, if data changes refresh content
-     */
-    if (!forceReload) {
-      ocmController.getSection(DataRequest.ONLY_CACHE, contentUrl, imagesToDownload,
-          new OcmController.GetSectionControllerCallback() {
-
-            @Override public void onGetSectionLoaded(ContentData cachedContentData) {
-              if (cachedContentData == null) {
-                ocmController.getSection(DataRequest.FORCE_CLOUD, contentUrl, imagesToDownload,
-                    new OcmController.GetSectionControllerCallback() {
-
-                      @Override public void onGetSectionLoaded(ContentData newContentData) {
-                        renderContentItem(newContentData.getContent());
-                      }
-
-                      @Override public void onGetSectionFails(Exception e) {
-                        renderError();
-                      }
-                    });
-              } else {
-
-                renderContentItem(cachedContentData.getContent());
-
-                ocmController.getSection(DataRequest.FIRST_CACHE, contentUrl, imagesToDownload,
-                    new OcmController.GetSectionControllerCallback() {
-
-                      @Override public void onGetSectionLoaded(ContentData newContentData) {
-                        if (newContentData.isFromCloud()) {
-                          checkNewContent(cachedContentData, newContentData);
-                        }
-                      }
-
-                      @Override public void onGetSectionFails(Exception e) {
-
-                      }
-                    });
-              }
-
-              OCManager.notifyOnLoadDataContentSectionFinished(uiMenu);
-            }
-
-            @Override public void onGetSectionFails(Exception e) {
-              renderError();
-              OCManager.notifyOnLoadDataContentSectionFinished(uiMenu);
-            }
-          });
-    } else {
-      ocmController.getSection(DataRequest.FIRST_CACHE, contentUrl, imagesToDownload,
+    /*
+    ocmController.getSection(DataRequest.FIRST_CACHE, contentUrl, imagesToDownload,
           new OcmController.GetSectionControllerCallback() {
 
             @Override public void onGetSectionLoaded(ContentData contentData) {
               if (contentData.isFromCloud()) {
 
-                /** This condition is realized because when the application is dead,
-                 *  Orchextra is dead too and when the data is sent without forcing
-                 *  it gives an exception because Orchextra is not initialized, so
-                 *  when tries to check menus there is an inconsistency.
-                 *
-                 *  Always show the button of new content,
-                 *  and only force data when the user does a pull to refresh
-                 */
                 if (reloadFromPullToRefresh) {
                   if (OCManager.hasOnChangedMenuCallback()) {
                     ocmController.refreshMenuData();
@@ -161,64 +113,31 @@ public class ContentViewPresenter extends Presenter<ContentView> {
 
             }
           });
-    }
+     */
+
+
+    //loadSection(true, uiMenu, filter, true);
   }
 
-  private void checkNewContent(ContentData cachedContentData, ContentData newContentData) {
-    if (cachedContentData == null
-        || newContentData == null
-        || cachedContentData.getContent() == null
-        || newContentData.getContent() == null
-        || cachedContentData.getContent().getElements() == null
-        || newContentData.getContent().getElements() == null
-        || getView() == null) {
-      return;
-    }
+  public void loadSection(boolean forceReload, UiMenu uiMenu, String filter,
+      boolean reloadFromPullToRefresh) {
+    this.uiMenu = uiMenu;
+    this.filter = filter;
 
-    UpdateAtType updateAtType = checkDifferents(cachedContentData, newContentData);
-    switch (updateAtType) {
-      case NEW_CONTENT:
-        getView().showNewExistingContent();
-        hasToCheckNewContent = false;
-        break;
-      case REFRESH:
-        //loadSection();
-        getView().showNewExistingContent();
-        hasToCheckNewContent = false;
-        break;
-    }
+    String contentUrl = uiMenu.getElementCache().getRender().getContentUrl();
 
-    getView().showProgressView(false);
-  }
 
-  private UpdateAtType checkDifferents(ContentData cachedContentData, ContentData newContentData) {
-    List<Element> cachedElements = cachedContentData.getContent().getElements();
-    List<Element> newElements = newContentData.getContent().getElements();
-
-    if (cachedElements.size() > newElements.size()) {
-      return UpdateAtType.REFRESH;
-    } else if (cachedElements.size() < newElements.size()) {
-      return UpdateAtType.NEW_CONTENT;
-    } else {
-      for (int i = 0; i < cachedElements.size(); i++) {
-        if (!cachedElements.get(i).getSlug().equalsIgnoreCase(newElements.get(i).getSlug())) {
-          return UpdateAtType.REFRESH;
-        } else {
-          ElementCache cachedElementCache =
-              cachedContentData.getElementsCache().get(cachedElements.get(i).getElementUrl());
-
-          ElementCache newElementCache =
-              newContentData.getElementsCache().get(newElements.get(i).getElementUrl());
-
-          if (cachedElementCache != null
-              && newElementCache != null
-              && cachedElementCache.getUpdateAt() != newElementCache.getUpdateAt()) {
-            return UpdateAtType.REFRESH;
-          }
-        }
+    ocmControllerKt.openSection(contentUrl, imagesToDownload, new OcmControllerKt.GetSectionControllerCallback() {
+      @Override public void onSectionLoaded(ContentData contentData, boolean hasChanged) {
+        renderContentItem(contentData.getContent());
+        OCManager.notifyOnLoadDataContentSectionFinished(uiMenu);
       }
-    }
-    return UpdateAtType.NONE;
+
+      @Override public void onSectionFails(@NotNull Exception e) {
+        renderError();
+        OCManager.notifyOnLoadDataContentSectionFinished(uiMenu);
+      }
+    });
   }
 
   private void renderContentItem(ContentItem contentItem) {
@@ -244,16 +163,6 @@ public class ContentViewPresenter extends Presenter<ContentView> {
       getView().showProgressView(false);
     }
   }
-
-  //private boolean hasFilter(ContentItem contentItem){
-  //  if(filter!=null && !filter.isEmpty()){
-  //    if(contentItem.getTags()!=null){
-  //      return contentItem.getTags().contains(filter);
-  //    }
-  //    return false;
-  //  }
-  //  return true;
-  //}
 
   private void renderError() {
     if (getView() != null) {
@@ -414,16 +323,6 @@ public class ContentViewPresenter extends Presenter<ContentView> {
             getView().contentNotAvailable();
           }
         });
-  }
-
-  private boolean checkElementNeedAuthUser(Element element) {
-    return !checkUserHasPermissionsToShowElement(element.getSegmentation().getRequiredAuth());
-  }
-
-  private boolean checkUserHasPermissionsToShowElement(
-      RequiredAuthoritation requiredAuthoritation) {
-    return authoritation.isAuthorizatedUser() || !requiredAuthoritation.equals(
-        RequiredAuthoritation.LOGGED);
   }
 
   public void setFilter(String filter) {

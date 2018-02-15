@@ -231,7 +231,7 @@ public class OcmControllerImp implements OcmController {
           @Override public void onGetSectionFails(Exception e) {
 
           }
-        }), GetSection.Params.forSection(false, contentUrl, imagesToDownload),
+        }), GetSection.Params.forSection(com.gigigo.orchextra.core.domain.entities.DataRequest.DEFAULT, contentUrl, imagesToDownload),
         PriorityScheduler.Priority.HIGH);
   }
 
@@ -254,7 +254,7 @@ public class OcmControllerImp implements OcmController {
           getSectionControllerCallback.onGetSectionFails(e);
         }
       }
-    }), GetSection.Params.forSection(false, contentUrl, imagesToDownload),
+    }), GetSection.Params.forSection(com.gigigo.orchextra.core.domain.entities.DataRequest.DEFAULT, contentUrl, imagesToDownload),
         PriorityScheduler.Priority.HIGH);
   }
 
@@ -277,7 +277,7 @@ public class OcmControllerImp implements OcmController {
                 getSectionControllerCallback.onGetSectionFails(e);
               }
             }
-          }), GetSection.Params.forSection(true, contentUrl, imagesToDownload),
+          }), GetSection.Params.forSection(com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CLOUD, contentUrl, imagesToDownload),
           PriorityScheduler.Priority.HIGH);
     } else if (getSectionControllerCallback != null) {
       getSectionControllerCallback.onGetSectionLoaded(contentData);

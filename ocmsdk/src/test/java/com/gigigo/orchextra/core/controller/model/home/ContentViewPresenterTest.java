@@ -3,6 +3,7 @@ package com.gigigo.orchextra.core.controller.model.home;
 import com.gigigo.orchextra.core.controller.model.home.grid.ContentView;
 import com.gigigo.orchextra.core.controller.model.home.grid.ContentViewPresenter;
 import com.gigigo.orchextra.core.domain.OcmController;
+import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.menus.DataRequest;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
 import com.gigigo.orchextra.ocm.dto.UiMenu;
@@ -26,13 +27,14 @@ import static org.mockito.Mockito.verify;
   private final String FAKE_FILTER = "FAKE_FILTER";
 
   @Mock private OcmController mockOcmController;
+  @Mock private OcmControllerKt mockOcmControllerKt;
   @Mock private Authoritation mockAuthoritation;
   @Mock private ContentView mockContentView;
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Before public void setUp() {
-    presenter = new ContentViewPresenter(mockOcmController, mockAuthoritation);
+    presenter = new ContentViewPresenter(mockOcmController, mockOcmControllerKt, mockAuthoritation);
     presenter.attachView(mockContentView);
   }
 

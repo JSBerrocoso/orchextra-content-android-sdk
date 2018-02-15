@@ -1,5 +1,6 @@
 package com.gigigo.orchextra.core.domain.rxInteractor;
 
+import com.gigigo.orchextra.core.domain.entities.DataRequest;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentData;
 import com.gigigo.orchextra.core.domain.rxExecutor.PostExecutionThread;
 import com.gigigo.orchextra.core.domain.rxRepository.OcmRepository;
@@ -21,23 +22,23 @@ public class GetSection extends UseCase<ContentData, GetSection.Params> {
   }
 
   @Override Observable<ContentData> buildUseCaseObservable(Params params) {
-    return this.ocmRepository.getSectionElements(params.forceReload, params.contentUrl, params.imagesToDownload);
+    return this.ocmRepository.getSectionElements(params.forceSource, params.contentUrl, params.imagesToDownload);
   }
 
   public static final class Params {
 
-    private final boolean forceReload;
+    private final DataRequest forceSource;
     private final String contentUrl;
     private final int imagesToDownload;
 
-    private Params(boolean forceReload, String contentUrl, int imagesToDownload) {
-      this.forceReload = forceReload;
+    private Params(DataRequest forceSource, String contentUrl, int imagesToDownload) {
+      this.forceSource = forceSource;
       this.contentUrl = contentUrl;
       this.imagesToDownload = imagesToDownload;
     }
 
-    public static Params forSection(boolean forceReload, String contentUrl, int imagestodownload) {
-      return new Params(forceReload, contentUrl, imagestodownload);
+    public static Params forSection(DataRequest forceSource, String contentUrl, int imagestodownload) {
+      return new Params(forceSource, contentUrl, imagestodownload);
     }
   }
 }

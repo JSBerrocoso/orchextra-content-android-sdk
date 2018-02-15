@@ -60,7 +60,7 @@ import orchextra.javax.inject.Singleton;
         Log.i(TAG, "FORCE CLOUD - Menus");
         ocmDataStore = getCloudDataStore();
         break;
-       default:
+      default:
       case DEFAULT:
         OcmCache cache = diskDataStore.getOcmCache();
         if (cache.isMenuCached() && !cache.isMenuExpired()) {
@@ -76,23 +76,31 @@ import orchextra.javax.inject.Singleton;
     return ocmDataStore;
   }
 
-  public OcmDataStore getDataStoreForSections(boolean force, String section) {
+  public OcmDataStore getDataStoreForSections(DataRequest forceSource, String section) {
     OcmDataStore ocmDataStore;
 
     if (!connectionUtils.hasConnection()) return getDiskDataStore();
 
-    if (force) {
-      Log.i(TAG, "CLOUD - Sections");
-      ocmDataStore = getCloudDataStore();
-    } else {
-      OcmCache cache = diskDataStore.getOcmCache();
-      if (cache.isSectionCached(section) && !cache.isSectionExpired(section)) {
+    switch (forceSource) {
+      case FORCE_CACHE:
         Log.i(TAG, "DISK  - Sections");
         ocmDataStore = getDiskDataStore();
-      } else {
+        break;
+      case FORCE_CLOUD:
         Log.i(TAG, "CLOUD - Sections");
         ocmDataStore = getCloudDataStore();
-      }
+        break;
+      default:
+      case DEFAULT:
+        OcmCache cache = diskDataStore.getOcmCache();
+        if (cache.isSectionCached(section) && !cache.isSectionExpired(section)) {
+          Log.i(TAG, "DISK  - Sections");
+          ocmDataStore = getDiskDataStore();
+        } else {
+          Log.i(TAG, "CLOUD - Sections");
+          ocmDataStore = getCloudDataStore();
+        }
+        break;
     }
 
     return ocmDataStore;

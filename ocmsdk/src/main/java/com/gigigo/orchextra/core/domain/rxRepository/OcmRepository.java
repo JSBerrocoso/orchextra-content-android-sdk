@@ -17,7 +17,7 @@ public interface OcmRepository {
 
   Observable<MenuContentData> getMenu(DataRequest forceSource);
 
-  Observable<ContentData> getSectionElements(boolean forceReload, String elementUrl,
+  Observable<ContentData> getSectionElements(DataRequest forceSource, String elementUrl,
       int numberOfElementsToDownload);
 
   Observable<ElementData> getDetail(boolean forceReload, String section);

@@ -1,19 +1,16 @@
 package com.gigigo.orchextra.core.controller
 
 import android.util.Log
-import com.fernandocejas.arrow.functions.Predicates.not
-import com.gigigo.orchextra.core.controller.OcmControllerImpKt.Companion
 import com.gigigo.orchextra.core.data.rxException.ApiMenuNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiSectionNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiVersionNotFoundException
-import com.gigigo.orchextra.core.domain.OcmControllerKt.GetVersionControllerCallback
 import com.gigigo.orchextra.core.domain.OcmControllerKt
 import com.gigigo.orchextra.core.domain.OcmControllerKt.GetMenusControllerCallback
-import com.gigigo.orchextra.core.domain.entities.DataRequest
-import com.gigigo.orchextra.core.domain.entities.DataRequest.DEFAULT
+import com.gigigo.orchextra.core.domain.OcmControllerKt.GetSectionControllerCallback
 import com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CACHE
 import com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CLOUD
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentData
+import com.gigigo.orchextra.core.domain.entities.elements.Element
 import com.gigigo.orchextra.core.domain.entities.menus.MenuContentData
 import com.gigigo.orchextra.core.domain.entities.version.VersionData
 import com.gigigo.orchextra.core.domain.rxInteractor.DefaultObserver
@@ -70,21 +67,29 @@ class OcmControllerImpKt(
       )
     } else {
       //DO NOTHING: retrieve cached
-      doNothing()
+      loadMenuSections(
+          onLoaded = {
+            menuCallback.onMenusLoaded(it, false)
+          },
+          onFailed = {
+            menuCallback.onMenusFails(it)
+          }
+      )
     }
   }
 
   private fun versionHasChanged(versionData: VersionData): Boolean =
       ocmPreferences.version != versionData.version
 
-  private fun loadMenuSections(onLoaded: (UiMenuData?) -> Unit = {}, onFailed: (Exception) -> Unit = {}) {
+  private fun loadMenuSections(onLoaded: (UiMenuData?) -> Unit = {},
+      onFailed: (Exception) -> Unit = {}) {
     getMenus.execute(MenuObserver(object : GetMenusObserverCallback {
       override fun onMenusLoaded(uiMenuData: UiMenuData?) {
-        onLoaded.invoke(uiMenuData)
+        onLoaded(uiMenuData)
       }
 
       override fun onMenusFails(exception: Exception) {
-        onFailed.invoke(exception)
+        onFailed(exception)
       }
 
     }), GetMenus.Params.forForceSource(FORCE_CACHE), HIGH)
@@ -95,15 +100,24 @@ class OcmControllerImpKt(
       override fun onMenusLoaded(uiMenuData: UiMenuData?) {
         if (menusHasChanged(cachedMenuData, uiMenuData)) {
           //DISPLAY NEW CONTENT AVAILABLE BUTTON
-          displayNewContentAvailableButton(uiMenuData)
+          menuCallback.onMenusLoaded(uiMenuData, true)
         } else {
-          loadSections(uiMenuData)
+          //DO NOTHING
+          loadMenuSections(
+              onLoaded = {
+                menuCallback.onMenusLoaded(it, false)
+              },
+              onFailed = {
+                menuCallback.onMenusFails(it)
+              }
+          )
+          //TODO: loadSections
         }
       }
 
       override fun onMenusFails(exception: Exception) {
         //DISPLAY NEW CONTENT AVAILABLE BUTTON
-        displayNewContentAvailableButton(cachedMenuData)
+        menuCallback.onMenusLoaded(cachedMenuData, true)
       }
 
     }), GetMenus.Params.forForceSource(FORCE_CLOUD), HIGH)
@@ -114,39 +128,101 @@ class OcmControllerImpKt(
   }
 
 
-  private fun loadSections(uiMenuData: UiMenuData? = null) {
+  private fun loadSections(uiMenuData: UiMenuData? = null, onLoaded: (ContentData?) -> Unit = {},
+      onFailed: (Exception) -> Unit = {}) {
     menuCallback.onMenusLoaded(uiMenuData, false)
-    // getSection.execute()
 
-  }
+    /*
 
-  private fun checkSection() {
-    if (sectionUpdated()) {
-      //DISPLAY NEW CONTENT AVAILABLE BUTTON
-      displayNewContentAvailableButton()
-    } else {
-      //DO NOTHING
-      doNothing()
+    uiMenuData?.uiMenuList?.forEach { menu ->
+      val menuSize = uiMenuData?.uiMenuList?.size
+      var reached = 0
+      menu.elementCache.render.contentUrl?.let { content ->
+        loadSection(content,
+            onLoaded = {
+              reached ++
+              if(reached == menuSize) {
+                //TODO: all sections loaded
+              }
+            },
+            onFailed = {
+
+            }
+        )
+      }
     }
+    */
   }
 
-  private fun sectionUpdated(): Boolean =
-      true
 
-
-  private fun displayNewContentAvailableButton(uiMenuData: UiMenuData? = null) {
-    menuCallback.onMenusLoaded(uiMenuData, true)
-  }
-
-  private fun doNothing() {
-    loadMenuSections(
+  override fun openSection(contentUrl: String, imagesToDownload: Int,
+      getSectionControllerCallback: GetSectionControllerCallback) {
+    loadSection(contentUrl, imagesToDownload,
         onLoaded = {
-          menuCallback.onMenusLoaded(it, false)
+          getSectionControllerCallback.onSectionLoaded(it, false)
         },
         onFailed = {
-          menuCallback.onMenusFails(it)
+          checkSection(contentUrl, imagesToDownload, getSectionControllerCallback)
         }
     )
+  }
+
+  private fun loadSection(contentUrl: String, imagesToDownload: Int,
+      onLoaded: (ContentData?) -> Unit = {}, onFailed: (Exception) -> Unit = {}) {
+    getSection.execute(SectionObserver(object : GetSectionObserverCallback {
+      override fun onSectionLoaded(contentData: ContentData?) {
+        onLoaded(contentData)
+      }
+
+      override fun onSectionFails(exception: Exception) {
+        onFailed(exception)
+      }
+
+    }), GetSection.Params.forSection(FORCE_CACHE, contentUrl, imagesToDownload), HIGH)
+  }
+
+  private fun checkSection(contentUrl: String, imagesToDownload: Int,
+      getSectionControllerCallback: GetSectionControllerCallback,
+      cachedSectionData: ContentData? = null) {
+    getSection.execute(SectionObserver(object : GetSectionObserverCallback {
+      override fun onSectionLoaded(contentData: ContentData?) {
+        if (sectionHasChanged(cachedSectionData, contentData)) {
+          getSectionControllerCallback.onSectionLoaded(contentData, true)
+        } else {
+          getSectionControllerCallback.onSectionLoaded(cachedSectionData, false)
+        }
+      }
+
+      override fun onSectionFails(exception: Exception) {
+        getSectionControllerCallback.onSectionFails(exception)
+      }
+
+    }), GetSection.Params.forSection(FORCE_CLOUD, contentUrl, imagesToDownload), HIGH)
+  }
+
+  private fun sectionHasChanged(cachedSectionData: ContentData?,
+      contentData: ContentData?): Boolean {
+    val cachedElements = cachedSectionData?.content?.elements ?: emptyList()
+    val newElements = contentData?.content?.elements ?: emptyList()
+
+    when {
+      cachedElements.size != newElements.size -> return true
+      else -> for ((index, cachedElement) in cachedElements.withIndex()) {
+        var newElement = newElements[index]
+        if (!cachedElement.slug.equals(newElement.slug, true)) {
+          return true
+        } else {
+          val cachedElementCache = cachedSectionData?.elementsCache?.get(cachedElement.elementUrl)
+          val newElementCache = contentData?.elementsCache?.get(newElement.elementUrl)
+
+          if (cachedElementCache?.updateAt != newElementCache?.updateAt) {
+            return true
+          }
+        }
+      }
+    }
+
+    return false
   }
 
   companion object {
@@ -210,35 +286,35 @@ class VersionObserver(
 }
 
 class MenuObserver(
-    private val getMenusCallback: GetMenusObserverCallback) : DefaultObserver<MenuContentData>() {
+    private val getMenusCallback: GetMenusObserverCallback?) : DefaultObserver<MenuContentData>() {
 
   override fun onComplete() {
 
   }
 
   override fun onNext(menuContentData: MenuContentData) {
-    getMenusCallback.onMenusLoaded(OcmControllerImpKt.transformMenu(menuContentData))
+    getMenusCallback?.onMenusLoaded(OcmControllerImpKt.transformMenu(menuContentData))
   }
 
   override fun onError(e: Throwable) {
-    getMenusCallback.onMenusFails(ApiMenuNotFoundException(e))
+    getMenusCallback?.onMenusFails(ApiMenuNotFoundException(e))
     e.printStackTrace()
   }
 }
 
-class SectionObserver(private val loaded: (ContentData) -> Unit = {},
-    private val fails: (Throwable) -> Unit = {}) : DefaultObserver<ContentData>() {
+class SectionObserver(
+    private val getSectionObserverCallback: GetSectionObserverCallback?) : DefaultObserver<ContentData>() {
 
   override fun onComplete() {
 
   }
 
   override fun onNext(contentData: ContentData) {
-    loaded(contentData)
+    getSectionObserverCallback?.onSectionLoaded(contentData)
   }
 
   override fun onError(e: Throwable) {
-    fails(ApiSectionNotFoundException(e))
+    getSectionObserverCallback?.onSectionFails(ApiSectionNotFoundException(e))
     e.printStackTrace()
   }
 }
@@ -252,4 +328,9 @@ interface GetVersionObserverCallback {
 interface GetMenusObserverCallback {
   fun onMenusLoaded(uiMenuData: UiMenuData?)
   fun onMenusFails(exception: Exception)
+}
+
+interface GetSectionObserverCallback {
+  fun onSectionLoaded(contentData: ContentData?)
+  fun onSectionFails(exception: Exception)
 }
