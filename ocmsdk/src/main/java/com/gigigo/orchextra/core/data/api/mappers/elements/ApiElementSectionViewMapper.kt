@@ -17,9 +17,6 @@ class ApiElementSectionViewMapper : ExternalClassToModelMapper<ApiElementSection
       imageThumb = data.imageThumb
     }
 
-    val currentTime = System.currentTimeMillis() - time
-    Log.v("TT - ApiElemSectionView", ("" + currentTime/1000))
-
     return model
   }
 }

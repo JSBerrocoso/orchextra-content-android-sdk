@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
   @Test public void testLoadSectionWithCacheAndAfterNetwork() {
     presenter.loadSection(new UiMenu(), FAKE_FILTER);
 
-    verify(mockOcmController).getSection(any(DataRequest.class), anyString(), anyInt(),
-        any(OcmController.GetSectionControllerCallback.class));
+    verify(mockOcmControllerKt).openSection(anyString(), anyInt(),
+        any(OcmControllerKt.GetSectionControllerCallback.class));
   }
 }

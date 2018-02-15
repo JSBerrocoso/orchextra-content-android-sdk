@@ -1,6 +1,7 @@
 package com.gigigo.orchextra.core.controller;
 
 import com.gigigo.orchextra.core.domain.OcmController;
+import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.menus.DataRequest;
 import com.gigigo.orchextra.core.domain.rxInteractor.ClearCache;
 import com.gigigo.orchextra.core.domain.rxInteractor.GetDetail;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @RunWith(MockitoJUnitRunner.class) public class OcmControllerTest {
 
   private OcmController ocmController;
+  private OcmControllerKt ocmControllerKt;
 
   private final String FAKE_SECTION = "FAKE_SECTION";
   private final String FAKE_DETAIL = "FAKE_DETAIL";
@@ -50,6 +52,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
     ocmController =
         new OcmControllerImp(mockGetVersion,mockGetMenus, mockGetSection, mockGetDetail, mockSearchElements,
             mockClearCache, mockConnectionUtils, mockOcmPreferences);
+    ocmControllerKt =
+        new OcmControllerImpKt(mockGetVersion,mockGetMenus, mockGetSection, mockOcmPreferences);
   }
 
   @Test public void testClearCache() {

@@ -15,8 +15,6 @@ class ApiElementSegmentationMapper : ExternalClassToModelMapper<ApiElementSegmen
 
     model.requiredAuth = RequiredAuthoritation.convert(data.requiredAuth)
 
-    val currentTime = System.currentTimeMillis() - time
-    Log.v("TT - ApiElemSegmentatio", ("" + currentTime/1000))
     return model
   }
 }

@@ -126,7 +126,6 @@ public class ContentViewPresenter extends Presenter<ContentView> {
 
     String contentUrl = uiMenu.getElementCache().getRender().getContentUrl();
 
-
     ocmControllerKt.openSection(contentUrl, imagesToDownload, new OcmControllerKt.GetSectionControllerCallback() {
       @Override public void onSectionLoaded(ContentData contentData, boolean hasChanged) {
         renderContentItem(contentData.getContent());
