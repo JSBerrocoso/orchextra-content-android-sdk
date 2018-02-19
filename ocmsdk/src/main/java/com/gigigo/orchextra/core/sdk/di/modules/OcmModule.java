@@ -7,6 +7,7 @@ import com.gigigo.orchextra.core.domain.OcmController;
 import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
 import com.gigigo.orchextra.core.domain.rxInteractor.PriorityScheduler;
+import com.gigigo.orchextra.core.domain.utils.ConnectionUtils;
 import com.gigigo.orchextra.core.sdk.OcmSchemeHandler;
 import com.gigigo.orchextra.core.sdk.OcmStyleUi;
 import com.gigigo.orchextra.core.sdk.OcmStyleUiImp;
@@ -57,8 +58,8 @@ import orchextra.javax.inject.Singleton;
   }
 
   @Singleton @Provides OcmSchemeHandler provideOcmSchemeHandler(OcmContextProvider contextProvider,
-      OcmController ocmController, OcmControllerKt ocmControllerKt, ActionHandler actionHandler, Authoritation authoritation) {
-    return new OcmSchemeHandler(contextProvider, ocmController, ocmControllerKt, actionHandler, authoritation);
+      OcmController ocmController, OcmControllerKt ocmControllerKt, ActionHandler actionHandler, Authoritation authoritation, ConnectionUtils connectionUtils) {
+    return new OcmSchemeHandler(contextProvider, ocmController, ocmControllerKt, actionHandler, authoritation, connectionUtils);
   }
 
   @Singleton @Provides OcmStyleUi provideOcmStyleUi() {

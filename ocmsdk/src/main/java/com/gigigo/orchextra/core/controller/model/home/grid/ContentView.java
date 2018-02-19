@@ -3,6 +3,7 @@ package com.gigigo.orchextra.core.controller.model.home.grid;
 import android.view.View;
 import com.gigigo.multiplegridrecyclerview.entities.Cell;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentItemTypeLayout;
+import com.gigigo.orchextra.core.sdk.OcmSchemeHandler;
 import java.util.List;
 
 public interface ContentView {
@@ -15,9 +16,7 @@ public interface ContentView {
 
   void showErrorView(boolean isVisible);
 
-  void navigateToDetailView(String elementUrl, String imageToExpand, View view);
-
-  void showAuthDialog(String elementUrl);
+  void navigateToDetailView(String elementUrl, View view, OcmSchemeHandler.ProcessElementCallback processElementCallback);
 
   void showProgressView(boolean isVisible);
 

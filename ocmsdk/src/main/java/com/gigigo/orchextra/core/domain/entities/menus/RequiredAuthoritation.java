@@ -18,7 +18,7 @@ public enum RequiredAuthoritation {
   public static RequiredAuthoritation convert(String requiredAuth) {
     RequiredAuthoritation[] values = RequiredAuthoritation.values();
     for (RequiredAuthoritation value : values) {
-      if (requiredAuth.equals(value.getAuthoritation())) {
+      if (value.getAuthoritation().equals(requiredAuth)) {
         return value;
       }
     }

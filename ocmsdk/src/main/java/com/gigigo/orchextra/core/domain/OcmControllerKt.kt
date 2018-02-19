@@ -29,6 +29,5 @@ interface OcmControllerKt {
   interface GetDetailControllerCallback {
     fun onDetailLoaded(elementCache: ElementCache)
     fun onDetailFails(e: Exception)
-    fun onDetailNoAvailable(e: Exception)
   }
 }

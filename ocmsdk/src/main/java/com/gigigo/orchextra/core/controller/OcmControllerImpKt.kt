@@ -4,7 +4,6 @@ import com.gigigo.orchextra.core.data.rxException.ApiDetailNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiMenuNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiSectionNotFoundException
 import com.gigigo.orchextra.core.data.rxException.ApiVersionNotFoundException
-import com.gigigo.orchextra.core.data.rxException.NetworkConnectionException
 import com.gigigo.orchextra.core.domain.OcmControllerKt
 import com.gigigo.orchextra.core.domain.OcmControllerKt.GetDetailControllerCallback
 import com.gigigo.orchextra.core.domain.OcmControllerKt.GetMenusControllerCallback
@@ -13,8 +12,6 @@ import com.gigigo.orchextra.core.domain.entities.DataRequest.DEFAULT
 import com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CACHE
 import com.gigigo.orchextra.core.domain.entities.DataRequest.FORCE_CLOUD
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentData
-import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache
-import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCacheType
 import com.gigigo.orchextra.core.domain.entities.elements.ElementData
 import com.gigigo.orchextra.core.domain.entities.menus.MenuContentData
 import com.gigigo.orchextra.core.domain.entities.version.VersionData
@@ -25,7 +22,6 @@ import com.gigigo.orchextra.core.domain.rxInteractor.GetSection
 import com.gigigo.orchextra.core.domain.rxInteractor.GetVersion
 import com.gigigo.orchextra.core.domain.rxInteractor.PriorityScheduler
 import com.gigigo.orchextra.core.domain.rxInteractor.PriorityScheduler.Priority.HIGH
-import com.gigigo.orchextra.core.domain.utils.ConnectionUtils
 import com.gigigo.orchextra.core.sdk.utils.DateUtils
 import com.gigigo.orchextra.core.sdk.utils.OcmPreferences
 import com.gigigo.orchextra.ocm.OCManager
@@ -39,7 +35,6 @@ class OcmControllerImpKt(
     private val getMenus: GetMenus,
     private val getSection: GetSection,
     private val getDetail: GetDetail,
-    private val connectionUtils: ConnectionUtils,
     private val ocmPreferences: OcmPreferences) : OcmControllerKt {
 
   lateinit var menuCallback: GetMenusControllerCallback
@@ -248,12 +243,6 @@ class OcmControllerImpKt(
     val slug = getSlug(elementUrl)
     getDetail.execute(DetailObserver(object : GetDetailObserverCallback {
       override fun onDetailLoaded(elementData: ElementData) {
-        if (!connectionUtils.hasConnection() && (elementData.element.type == ElementCacheType.WEBVIEW || elementData.element.type == ElementCacheType.VIDEO)) {
-          getDetailControllerCallback?.onDetailNoAvailable(NetworkConnectionException())
-        } else {
-          getDetailControllerCallback?.onDetailLoaded(elementData.element)
-        }
-
         getDetailControllerCallback.onDetailLoaded(elementData.element)
       }
 

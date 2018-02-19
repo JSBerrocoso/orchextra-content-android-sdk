@@ -2,6 +2,7 @@ package com.gigigo.orchextra.core.sdk;
 
 import android.text.TextUtils;
 import android.widget.ImageView;
+import com.gigigo.orchextra.core.data.rxException.NetworkConnectionException;
 import com.gigigo.orchextra.core.domain.OcmController;
 import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
@@ -12,6 +13,7 @@ import com.gigigo.orchextra.core.domain.entities.elementcache.VideoFormat;
 import com.gigigo.orchextra.core.domain.entities.elements.ElementSegmentation;
 import com.gigigo.orchextra.core.domain.entities.menus.RequiredAuthoritation;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
+import com.gigigo.orchextra.core.domain.utils.ConnectionUtils;
 import com.gigigo.orchextra.core.sdk.actions.ActionHandler;
 import com.gigigo.orchextra.core.sdk.application.OcmContextProvider;
 import com.gigigo.orchextra.core.sdk.model.detail.DetailActivity;
@@ -28,16 +30,18 @@ public class OcmSchemeHandler {
   private final OcmControllerKt ocmControllerKt;
   private final ActionHandler actionHandler;
   private final Authoritation authoritation;
+  private final ConnectionUtils connectionUtils;
   private String elementURL;
   private String processElementURL;
 
   public OcmSchemeHandler(OcmContextProvider contextProvider, OcmController ocmController, OcmControllerKt ocmControllerKt,
-      ActionHandler actionHandler, Authoritation authoritation) {
+      ActionHandler actionHandler, Authoritation authoritation, ConnectionUtils connectionUtils) {
     this.contextProvider = contextProvider;
     this.ocmController = ocmController;
     this.ocmControllerKt = ocmControllerKt;
     this.actionHandler = actionHandler;
     this.authoritation = authoritation;
+    this.connectionUtils = connectionUtils;
   }
 
   public void processElementUrl(final String elementUrl) {
@@ -48,31 +52,36 @@ public class OcmSchemeHandler {
     }
 
     String finalElementUri = elementUri;
-    ocmController.getDetails(elementUri, new OcmController.GetDetailControllerCallback() {
-      @Override public void onGetDetailLoaded(ElementCache elementCache) {
+    ocmControllerKt.getDetail(elementUri, new OcmControllerKt.GetDetailControllerCallback() {
+      @Override public void onDetailLoaded(ElementCache elementCache) {
         if (elementCache != null) {
-          if (elementRequiredUserToBeLogged(elementCache)) {
-            // Save url of the element that require login
-            elementURL = elementUrl;
-            OCManager.notifyRequiredLoginToContinue(elementURL);
-          } else {
-            executeAction(elementCache, finalElementUri, null, 0, 0, null);
+          if (!connectionUtils.hasConnection() && (elementCache.getType() == ElementCacheType.WEBVIEW || elementCache.getType() == ElementCacheType.VIDEO)) {
+           // processElementCallback.onProcessElementFail(new NetworkConnectionException());
+          }
+          else {
+            if (elementRequiredUserToBeLogged(elementCache)) {
+              // Save url of the element that require login
+              elementURL = elementUrl;
+              OCManager.notifyRequiredLoginToContinue(elementURL);
+            } else {
+              executeAction(elementCache, finalElementUri, null, null);
+            }
           }
         }
       }
 
-      @Override public void onGetDetailFails(Exception e) {
-        e.printStackTrace();
-      }
-
-      @Override public void onGetDetailNoAvailable(Exception e) {
+      @Override public void onDetailFails(Exception e) {
         e.printStackTrace();
       }
     });
   }
 
-  public void processElementUrl(String elementUrl, String urlImageToExpand, int widthScreen,
-      int heightScreen, ImageView imageViewToExpandInDetail) {
+  public interface ProcessElementCallback {
+    void onProcessElementSuccess(ElementCache elementCache);
+    void onProcessElementFail(Exception exception);
+  }
+
+  public void processElementUrl(String elementUrl, ImageView imageViewToExpandInDetail, ProcessElementCallback processElementCallback) {
 
     WeakReference<ImageView> imageViewWeakReference =
         new WeakReference<>(imageViewToExpandInDetail);
@@ -87,23 +96,31 @@ public class OcmSchemeHandler {
     ocmControllerKt.getDetail(elementUri, new OcmControllerKt.GetDetailControllerCallback() {
       @Override public void onDetailLoaded(ElementCache elementCache) {
         if (elementCache != null) {
-          if (elementRequiredUserToBeLogged(elementCache)) {
-            // Save url of the element that require login
-            processElementURL = elementUrl;
-            OCManager.notifyRequiredLoginToContinue(processElementURL);
-          } else {
-            executeAction(elementCache, finalElementUri, urlImageToExpand, widthScreen,
-                heightScreen, imageViewWeakReference);
+          if (!connectionUtils.hasConnection() && (elementCache.getType() == ElementCacheType.WEBVIEW || elementCache.getType() == ElementCacheType.VIDEO)) {
+            processElementCallback.onProcessElementFail(new NetworkConnectionException());
+          }
+          else {
+
+            processElementCallback.onProcessElementSuccess(elementCache);
+
+            String urlImageToExpand = null;
+            if (elementCache != null && elementCache.getPreview() != null) {
+              urlImageToExpand = elementCache.getPreview().getImageUrl();
+            }
+
+            if (elementRequiredUserToBeLogged(elementCache)) {
+              // Save url of the element that require login
+              processElementURL = elementUrl;
+              OCManager.notifyRequiredLoginToContinue(processElementURL);
+            } else {
+              executeAction(elementCache, finalElementUri, urlImageToExpand, imageViewWeakReference);
+            }
           }
         }
       }
 
-      @Override public void onDetailFails(Exception e) {
-        e.printStackTrace();
-      }
-
-      @Override public void onDetailNoAvailable(Exception e) {
-        e.printStackTrace();
+      @Override public void onDetailFails(Exception exception) {
+        processElementCallback.onProcessElementFail(exception);
       }
     });
   }
@@ -119,14 +136,12 @@ public class OcmSchemeHandler {
     return loggedRequired && !authoritation.isAuthorizatedUser();
   }
 
-  public void executeAction(ElementCache cachedElement, String elementUrl, String urlImageToExpand,
-      int widthScreen, int heightScreen, WeakReference<ImageView> imageViewToExpandInDetail) {
+  public void executeAction(ElementCache cachedElement, String elementUrl, String urlImageToExpand, WeakReference<ImageView> imageViewToExpandInDetail) {
 
     boolean hasPreview = cachedElement.getPreview() != null;
 
     if (hasPreview) {
-      processDetailActivity(elementUrl, urlImageToExpand, widthScreen, heightScreen,
-          imageViewToExpandInDetail);
+      processDetailActivity(elementUrl, urlImageToExpand, imageViewToExpandInDetail);
       return;
     }
 
@@ -177,14 +192,15 @@ public class OcmSchemeHandler {
         }
         break;
       default:
-        processDetailActivity(elementUrl, urlImageToExpand, widthScreen, heightScreen,
-            imageViewToExpandInDetail);
+        processDetailActivity(elementUrl, urlImageToExpand, imageViewToExpandInDetail);
         break;
     }
   }
 
-  private void processDetailActivity(String elementUrl, String urlImageToExpand, int widthScreen,
-      int heightScreen, WeakReference<ImageView> imageViewToExpandInDetail) {
+  private void processDetailActivity(String elementUrl, String urlImageToExpand, WeakReference<ImageView> imageViewToExpandInDetail) {
+    int widthScreen = DeviceUtils.calculateRealWidthDeviceInImmersiveMode(contextProvider.getCurrentActivity());
+    int heightScreen = DeviceUtils.calculateHeightDeviceInImmersiveMode(contextProvider.getCurrentActivity());
+
     ImageView imageView = null;
     if (imageViewToExpandInDetail != null) {
       imageView = imageViewToExpandInDetail.get();

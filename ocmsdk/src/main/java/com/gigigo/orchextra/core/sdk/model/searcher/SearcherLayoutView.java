@@ -17,6 +17,7 @@ import com.gigigo.orchextra.core.controller.dto.CellGridContentData;
 import com.gigigo.orchextra.core.controller.model.searcher.SearcherLayoutInterface;
 import com.gigigo.orchextra.core.controller.model.searcher.SearcherLayoutPresenter;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
+import com.gigigo.orchextra.core.sdk.OcmSchemeHandler;
 import com.gigigo.orchextra.core.sdk.di.injector.Injector;
 import com.gigigo.orchextra.core.sdk.model.grid.factory.ElementsViewHolderFactory;
 import com.gigigo.orchextra.core.sdk.model.grid.viewholders.CellImageViewHolder;
@@ -167,20 +168,12 @@ public class SearcherLayoutView extends UiSearchBaseContentData implements Searc
     super.onDestroy();
   }
 
-  @Override public void navigateToDetailView(String elementUrl, String urlImageToExpand,
-      AppCompatActivity activity, View view) {
+  @Override public void navigateToDetailView(String elementUrl, View view, AppCompatActivity activity, OcmSchemeHandler.ProcessElementCallback processElementCallback) {
 
     if (view != null) {
-      final ImageView imageViewToExpandInDetail =
-          (ImageView) view.findViewById(R.id.image_to_expand_in_detail);
+      final ImageView imageViewToExpandInDetail = view.findViewById(R.id.image_to_expand_in_detail);
 
-      OCManager.generateDetailView(elementUrl, urlImageToExpand,
-          DeviceUtils.calculateRealWidthDeviceInImmersiveMode(context),
-          DeviceUtils.calculateHeightDeviceInImmersiveMode(context), imageViewToExpandInDetail);
+      OCManager.generateDetailView(elementUrl, imageViewToExpandInDetail, processElementCallback);
     }
-  }
-
-  @Override public void showAuthDialog() {
-    OCManager.notifyRequiredLoginToContinue();
   }
 }

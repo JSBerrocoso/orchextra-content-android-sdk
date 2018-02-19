@@ -180,38 +180,20 @@ Add Comment C
   static void setEventCallback(OnEventCallback onEventCallback) {
     getInstance().onEventCallback = onEventCallback;
   }
-  /*
 
-  static void getMenus(DataRequest menuRequest, final OCManagerCallbacks.Menus menusCallback) {
-    final long time = System.currentTimeMillis();
-    if (instance != null) {
-      instance.ocmViewGenerator.getMenu(menuRequest,
-          new OcmViewGenerator.GetMenusViewGeneratorCallback() {
-            @Override public void onGetMenusLoaded(UiMenuData menus, boolean hasChanged) {
-              Log.v("TT - LOADED menus", (System.currentTimeMillis() - time) / 1000 + "");
-              if (menus != null
-                  && menus.getUiMenuList() != null
-                  && menus.getUiMenuList().size() > 0) {
-                instance.uiMenuToNotifyWhenSectionIsLoaded = menus.getUiMenuList().get(0);
-              }
-
-              menusCallback.onMenusLoaded(menus, hasChanged);
-            }
-
-            @Override public void onGetMenusFails(Throwable e) {
-              menusCallback.onMenusFails(e);
-            }
-          });
-    }
+  public static UiDetailBaseContentData generateDetailView(String elementUrl) {
+    return instance.ocmViewGenerator.generateDetailView(elementUrl);
   }
-  */
+
+  static UiSearchBaseContentData generateSearchView() {
+    return instance.ocmViewGenerator.generateSearchView();
+  }
 
   static void updateContent(final OCManagerCallbacks.Menus menusCallback) {
     final long time = System.currentTimeMillis();
     if (instance != null) {
       instance.ocmViewGenerator.updateContent(new OcmViewGenerator.GetMenusViewGeneratorCallback() {
             @Override public void onGetMenusLoaded(UiMenuData menus, boolean hasChanged) {
-              Log.v("TT - LOADED menus", (System.currentTimeMillis() - time) / 1000 + "");
               if (menus != null
                   && menus.getUiMenuList() != null
                   && menus.getUiMenuList().size() > 0) {
@@ -230,12 +212,10 @@ Add Comment C
 
   static void generateSectionView(UiMenu uiMenu, String filter, int imagesToDownload,
       final OCManagerCallbacks.Section sectionCallback) {
-    final long time = System.currentTimeMillis();
 
     instance.ocmViewGenerator.generateSectionView(uiMenu, filter, imagesToDownload,
         new OcmViewGenerator.GetSectionViewGeneratorCallback() {
           @Override public void onSectionViewLoaded(UiGridBaseContentData uiGridBaseContentData) {
-            Log.v("TT - LOADED sections", (System.currentTimeMillis() - time) / 1000 + "");
             sectionCallback.onSectionLoaded(uiGridBaseContentData);
           }
 
@@ -243,6 +223,19 @@ Add Comment C
             sectionCallback.onSectionFails(e);
           }
         });
+  }
+
+  public static void generateDetailView(String elementUrl, ImageView imageViewToExpandInDetail, OcmSchemeHandler.ProcessElementCallback processElementCallback) {
+
+    if (instance != null) {
+      instance.schemeHandler.processElementUrl(elementUrl, imageViewToExpandInDetail, processElementCallback);
+    }
+  }
+
+  static void processDeepLinks(String path) {
+    if (instance != null) {
+      instance.schemeHandler.processElementUrl(path);
+    }
   }
 
   public static void clearData(boolean images, boolean data,
@@ -262,23 +255,6 @@ Add Comment C
     }
   }
 
-  public static UiDetailBaseContentData generateDetailView(String elementUrl) {
-    return instance.ocmViewGenerator.generateDetailView(elementUrl);
-  }
-
-  public static void generateDetailView(String elementUrl, String urlImageToExpand, int widthScreen,
-      int heightScreen, ImageView imageViewToExpandInDetail) {
-
-    if (instance != null) {
-      instance.schemeHandler.processElementUrl(elementUrl, urlImageToExpand, widthScreen,
-          heightScreen, imageViewToExpandInDetail);
-    }
-  }
-
-  static UiSearchBaseContentData generateSearchView() {
-    return instance.ocmViewGenerator.generateSearchView();
-  }
-
   static void setUserIsAuthorizated(boolean isAuthorizated) {
     if (instance != null) {
       instance.authoritation.setAuthorizatedUser(isAuthorizated);
@@ -294,12 +270,6 @@ Add Comment C
   static void setStyleUi(OcmStyleUiBuilder ocmUiBuilder) {
     if (instance != null) {
       instance.ocmStyleUi.setStyleUi(ocmUiBuilder);
-    }
-  }
-
-  static void processDeepLinks(String path) {
-    if (instance != null) {
-      instance.schemeHandler.processElementUrl(path);
     }
   }
 

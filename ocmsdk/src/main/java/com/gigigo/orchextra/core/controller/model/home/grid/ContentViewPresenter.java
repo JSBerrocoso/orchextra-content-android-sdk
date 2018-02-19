@@ -7,19 +7,15 @@ import com.gigigo.multiplegridrecyclerview.entities.CellBlankElement;
 import com.gigigo.orchextra.core.controller.dto.CellCarouselContentData;
 import com.gigigo.orchextra.core.controller.dto.CellGridContentData;
 import com.gigigo.orchextra.core.controller.model.base.Presenter;
-import com.gigigo.orchextra.core.controller.model.home.UpdateAtType;
 import com.gigigo.orchextra.core.domain.OcmController;
 import com.gigigo.orchextra.core.domain.OcmControllerKt;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentData;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentItem;
 import com.gigigo.orchextra.core.domain.entities.contentdata.ContentItemPattern;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
-import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCacheType;
 import com.gigigo.orchextra.core.domain.entities.elements.Element;
-import com.gigigo.orchextra.core.domain.entities.menus.DataRequest;
-import com.gigigo.orchextra.core.domain.entities.menus.RequiredAuthoritation;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
-import com.gigigo.orchextra.core.sdk.ui.OcmWebViewActivity;
+import com.gigigo.orchextra.core.sdk.OcmSchemeHandler;
 import com.gigigo.orchextra.ocm.OCManager;
 import com.gigigo.orchextra.ocm.OcmEvent;
 import com.gigigo.orchextra.ocm.customProperties.ViewType;
@@ -33,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class ContentViewPresenter extends Presenter<ContentView> {
 
-  private final Authoritation authoritation;
   private final OcmController ocmController;
   private final OcmControllerKt ocmControllerKt;
 
@@ -49,7 +44,6 @@ public class ContentViewPresenter extends Presenter<ContentView> {
 
     this.ocmController = ocmController;
     this.ocmControllerKt = ocmControllerKt;
-    this.authoritation = authoritation;
   }
 
   @Override public void onViewAttached() {
@@ -278,52 +272,20 @@ public class ContentViewPresenter extends Presenter<ContentView> {
   }
 
   private void itemClickedContinue(Element element, View view) {
-    //TODO: why not use Ocm.processDeepLinks(elementUrl) instead??
-
     WeakReference<View> viewWeakReference = new WeakReference<>(view);
 
-    ocmController.getDetails(element.getElementUrl(),
-        new OcmController.GetDetailControllerCallback() {
-          @Override public void onGetDetailLoaded(ElementCache elementCache) {
-            String imageUrlToExpandInPreview = null;
-            if (elementCache != null && elementCache.getPreview() != null) {
-              imageUrlToExpandInPreview = elementCache.getPreview().getImageUrl();
-            }
+    getView().navigateToDetailView(element.getElementUrl(), viewWeakReference.get(), new OcmSchemeHandler.ProcessElementCallback() {
+      @Override public void onProcessElementSuccess(ElementCache elementCache) {
+        OCManager.notifyEvent(OcmEvent.CELL_CLICKED, elementCache);
+        OCManager.addArticleToReadedArticles(element.getSlug());
+        System.out.println("CELL_CLICKED: " + element.getSlug());
+      }
 
-            if (getView() != null) {
-              OCManager.notifyEvent(OcmEvent.CELL_CLICKED, elementCache);
-              OCManager.addArticleToReadedArticles(element.getSlug());
-              System.out.println("CELL_CLICKED: " + element.getSlug());
-
-              if (elementCache.getType()
-                  != ElementCacheType.WEBVIEW)//|| imageUrlToExpandInPreview!="" )
-              {
-                getView().navigateToDetailView(element.getElementUrl(), imageUrlToExpandInPreview,
-                    viewWeakReference.get());
-                //getView().navigateToDetailView(elementCache, viewWeakReference.get());
-              } else {
-                OcmWebViewActivity.open(viewWeakReference.get().getContext(),
-                    elementCache.getRender(), elementCache.getName());
-                //  if (imageUrlToExpandInPreview != "") {
-                //    OcmWebViewActivity.open(viewWeakReference.get().getContext(),
-                //        elementCache.getRender().getUrl(),elementCache.getName());
-                //  } else {
-                //    OcmWebViewActivity.open(viewWeakReference.get().getContext(),
-                //        elementCache.getRender().getUrl(),elementCache.getName(),imageUrlToExpandInPreview);
-                //  }
-              }
-            }
-          }
-
-          @Override public void onGetDetailFails(Exception e) {
-            e.printStackTrace();
-          }
-
-          @Override public void onGetDetailNoAvailable(Exception e) {
-            e.printStackTrace();
-            getView().contentNotAvailable();
-          }
-        });
+      @Override public void onProcessElementFail(Exception exception) {
+        exception.printStackTrace();
+        getView().contentNotAvailable();
+      }
+    });
   }
 
   public void setFilter(String filter) {

@@ -14,6 +14,10 @@ import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
 import com.gigigo.orchextra.core.domain.entities.elements.Element;
 import com.gigigo.orchextra.core.domain.entities.menus.RequiredAuthoritation;
 import com.gigigo.orchextra.core.domain.entities.ocm.Authoritation;
+import com.gigigo.orchextra.core.sdk.OcmSchemeHandler;
+import com.gigigo.orchextra.ocm.OCManager;
+import com.gigigo.orchextra.ocm.OcmEvent;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,39 +138,22 @@ public class SearcherLayoutPresenter extends Presenter<SearcherLayoutInterface> 
 
       Element element = (Element) cellGridContentDataList.get(position).getData();
 
-      ocmController.getDetails(element.getElementUrl(),
-          new OcmController.GetDetailControllerCallback() {
-            @Override public void onGetDetailLoaded(ElementCache elementCache) {
-              if (getView() != null) {
-                String imageUrlToExpandInPreview = null;
-                if (elementCache.getPreview() != null) {
-                  imageUrlToExpandInPreview = elementCache.getPreview().getImageUrl();
-                }
-
-                if (checkLoginAuth(element.getSegmentation().getRequiredAuth())) {
-
-                  getView().navigateToDetailView(element.getElementUrl(), imageUrlToExpandInPreview,
-                      activity, view);
-                } else {
-                  getView().showAuthDialog();
-                }
-              }
-            }
-
-            @Override public void onGetDetailFails(Exception e) {
-              e.printStackTrace();
-            }
-
-            @Override public void onGetDetailNoAvailable(Exception e) {
-              e.printStackTrace();
-            }
-          });
+      itemClickedContinue(element, activity, view);
     }
   }
 
-  private boolean checkLoginAuth(RequiredAuthoritation requiredAuthoritation) {
-    return authoritation.isAuthorizatedUser() || !requiredAuthoritation.equals(
-        RequiredAuthoritation.LOGGED);
+  private void itemClickedContinue(Element element, AppCompatActivity activity, View view) {
+    WeakReference<View> viewWeakReference = new WeakReference<>(view);
+
+    getView().navigateToDetailView(element.getElementUrl(), viewWeakReference.get(), activity, new OcmSchemeHandler.ProcessElementCallback() {
+      @Override public void onProcessElementSuccess(ElementCache elementCache) {
+        System.out.println("CELL_CLICKED: " + element.getSlug());
+      }
+
+      @Override public void onProcessElementFail(Exception exception) {
+        exception.printStackTrace();
+      }
+    });
   }
 
   public void updateUi() {
