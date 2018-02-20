@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -202,7 +203,7 @@ public class VimeoExoPlayerActivity extends AppCompatActivity {
     } else {
       hideStatusBar();
       newConfig.orientation = android.content.res.Configuration.ORIENTATION_PORTRAIT;
-      super.onConfigurationChanged(null);
+      super.onConfigurationChanged(new Configuration());
     }
     if (newConfig.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
       if (!isVertical) openFullscreenDialog();
@@ -276,20 +277,26 @@ public class VimeoExoPlayerActivity extends AppCompatActivity {
         && mFullScreenDialog != null) {
       ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
       mFullScreenDialog.addContentView(simpleExoPlayerView,
-          new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-      mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(VimeoExoPlayerActivity.this, R.drawable.ic_fullscreen_skrink));
+          new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+              ViewGroup.LayoutParams.MATCH_PARENT));
+      mFullScreenIcon.setImageDrawable(
+          ContextCompat.getDrawable(VimeoExoPlayerActivity.this, R.drawable.ic_fullscreen_skrink));
       mExoPlayerFullscreen = true;
       mFullScreenDialog.show();
     }
   }
 
   private void closeFullscreenDialog() {
-    ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
-    ((FrameLayout) findViewById(R.id.main_media_frame)).addView(simpleExoPlayerView);
-    mExoPlayerFullscreen = false;
-    mFullScreenDialog.dismiss();
-    mFullScreenIcon.setImageDrawable(
-        ContextCompat.getDrawable(VimeoExoPlayerActivity.this, R.drawable.ic_fullscreen_expand));
+    if (simpleExoPlayerView != null
+        && simpleExoPlayerView.getParent() != null
+        && mFullScreenDialog != null) {
+      ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
+      ((FrameLayout) findViewById(R.id.main_media_frame)).addView(simpleExoPlayerView);
+      mExoPlayerFullscreen = false;
+      mFullScreenDialog.dismiss();
+      mFullScreenIcon.setImageDrawable(
+          ContextCompat.getDrawable(VimeoExoPlayerActivity.this, R.drawable.ic_fullscreen_expand));
+    }
   }
 
   private void initFullscreenButton() {
