@@ -7,6 +7,7 @@ public enum ElementCacheType implements Serializable {
   CARDS("cards"),
   VUFORIA("vuforia"),
   SCAN("scan"),
+  OPEN_SCANNER("openScanner"),
   WEBVIEW("webview"),                     //WEBVIEW
   BROWSER("browser"),                     //CUSTOM TABS
   EXTERNAL_BROWSER("externalBrowser"),    //CHROME

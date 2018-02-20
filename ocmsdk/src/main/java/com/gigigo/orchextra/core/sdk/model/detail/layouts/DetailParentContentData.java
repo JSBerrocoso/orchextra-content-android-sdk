@@ -23,6 +23,7 @@ import com.gigigo.orchextra.ocm.OCManager;
 import com.gigigo.orchextra.ocm.OcmEvent;
 import com.gigigo.orchextra.ocm.callbacks.OnFinishViewListener;
 import com.gigigo.orchextra.ocmsdk.R;
+import com.gigigo.orchextra.wrapper.OxManager;
 import orchextra.javax.inject.Inject;
 
 public abstract class DetailParentContentData extends UiBaseContentData {
@@ -112,6 +113,12 @@ public abstract class DetailParentContentData extends UiBaseContentData {
       lauchOxScan();
       OCManager.notifyEvent(OcmEvent.OPEN_BARCODE);
       return true;
+    } else if (detailContentDataClass.equals(ScanContentData.class)) {
+      // TODO scanCode
+      throw new UnsupportedOperationException("Not implemented!");
+      //scanCode();
+      //OCManager.notifyEvent(OcmEvent.OPEN_SCANNER);
+      //return true;
     } else if (detailContentDataClass.equals(BrowserContentData.class)) {
       launchExternalBrowser(((BrowserContentData) uiBaseContentData).getUrl(),
           ((BrowserContentData) uiBaseContentData).getFederatedAuthorization());
@@ -160,6 +167,10 @@ public abstract class DetailParentContentData extends UiBaseContentData {
 
   private void lauchOxScan() {
     actionHandler.lauchOxScan();
+  }
+
+  private void scanCode(OxManager.ScanCodeListener scanCodeListener) {
+    actionHandler.scanCode(scanCodeListener);
   }
 
   private void launchOxVuforia() {

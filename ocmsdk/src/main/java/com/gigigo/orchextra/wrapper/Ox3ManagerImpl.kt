@@ -13,6 +13,7 @@ import com.gigigo.orchextra.indoorpositioning.OxIndoorPositioningImp
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver
 import com.gigigo.orchextra.scanner.OxScannerImp
 import com.gigigo.orchextra.wrapper.OxManager.ErrorListener
+import com.gigigo.orchextra.wrapper.OxManager.ScanCodeListener
 import com.gigigo.orchextra.wrapper.OxManager.StatusListener
 import com.gigigo.orchextra.wrapper.OxManager.TokenReceiver
 
@@ -31,8 +32,8 @@ class Ox3ManagerImpl : OxManager {
 
   override fun startScanner() = orchextra.openScanner()
 
-  override fun scanCode(scanCodeListener: (String) -> Unit) = with(orchextra) {
-    scanCode(scanCodeListener)
+  override fun scanCode(scanCodeListener: ScanCodeListener) = with(orchextra) {
+    scanCode { scanCodeListener.onCodeScan(it) }
   }
 
   override fun init(application: Application, config: OxConfig, statusListener: StatusListener) {

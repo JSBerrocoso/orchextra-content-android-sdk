@@ -1,6 +1,7 @@
 package com.gigigo.orchextra.core.sdk;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 import com.gigigo.orchextra.core.domain.OcmController;
 import com.gigigo.orchextra.core.domain.entities.elementcache.ElementCache;
@@ -18,10 +19,12 @@ import com.gigigo.orchextra.core.sdk.ui.OcmWebViewActivity;
 import com.gigigo.orchextra.core.sdk.utils.DeviceUtils;
 import com.gigigo.orchextra.ocm.OCManager;
 import com.gigigo.orchextra.ocm.OcmEvent;
+import com.gigigo.orchextra.wrapper.OxManager;
 import java.lang.ref.WeakReference;
 
 public class OcmSchemeHandler {
 
+  private static final String TAG = "OcmSchemeHandler";
   private final OcmContextProvider contextProvider;
   private final OcmController ocmController;
   private final ActionHandler actionHandler;
@@ -105,11 +108,11 @@ public class OcmSchemeHandler {
     });
   }
 
-  private boolean elementRequiredUserToBeLogged(ElementCache elementCache){
+  private boolean elementRequiredUserToBeLogged(ElementCache elementCache) {
     ElementSegmentation segmentation = elementCache.getSegmentation();
 
     boolean loggedRequired = false;
-    if(segmentation!=null) {
+    if (segmentation != null) {
       loggedRequired = RequiredAuthoritation.LOGGED.equals(segmentation.getRequiredAuth());
     }
 
@@ -141,6 +144,13 @@ public class OcmSchemeHandler {
         OCManager.notifyEvent(OcmEvent.OPEN_BARCODE, cachedElement);
         if (render != null) {
           processScanAction();
+        }
+        break;
+      case OPEN_SCANNER:
+        OCManager.notifyEvent(OcmEvent.OPEN_SCANNER, cachedElement);
+        if (render != null) {
+          String slug = cachedElement.getSlug();
+          processScanCode(code -> Log.d(TAG, "Code: " + code + ", slug: " + slug));
         }
         break;
       case WEBVIEW:
@@ -211,6 +221,10 @@ public class OcmSchemeHandler {
 
   private void processScanAction() {
     actionHandler.lauchOxScan();
+  }
+
+  private void processScanCode(OxManager.ScanCodeListener scanCodeListener) {
+    actionHandler.scanCode(scanCodeListener);
   }
 
   private void processExternalBrowser(String url, FederatedAuthorization federatedAuth) {

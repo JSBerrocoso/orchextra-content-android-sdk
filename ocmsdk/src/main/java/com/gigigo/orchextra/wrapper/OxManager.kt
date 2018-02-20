@@ -29,7 +29,7 @@ interface OxManager {
 
   fun onCustomScheme(customScheme: String)
 
-  fun scanCode(scanCodeListener: (String) -> Unit)
+  fun scanCode(scanCodeListener: ScanCodeListener)
 
   interface TokenReceiver {
     fun onGetToken(token: String)
@@ -43,5 +43,9 @@ interface OxManager {
 
   interface ErrorListener {
     fun onError(error: String)
+  }
+
+  interface ScanCodeListener {
+    fun onCodeScan(code: String)
   }
 }
