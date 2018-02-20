@@ -29,6 +29,8 @@ interface OxManager {
 
   fun onCustomScheme(customScheme: String)
 
+  fun scanCode(scanCodeListener: (String) -> Unit)
+
   interface TokenReceiver {
     fun onGetToken(token: String)
   }

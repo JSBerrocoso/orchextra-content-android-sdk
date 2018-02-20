@@ -6,7 +6,6 @@ import com.gigigo.orchextra.core.Orchextra
 import com.gigigo.orchextra.core.OrchextraErrorListener
 import com.gigigo.orchextra.core.OrchextraOptions
 import com.gigigo.orchextra.core.OrchextraStatusListener
-import com.gigigo.orchextra.core.domain.actions.actionexecutors.customaction.OrchextraCustomActionListener
 import com.gigigo.orchextra.core.domain.entities.Error
 import com.gigigo.orchextra.core.domain.entities.OxCRM
 import com.gigigo.orchextra.geofence.OxGeofenceImp
@@ -31,6 +30,10 @@ class Ox3ManagerImpl : OxManager {
   override fun startImageRecognition() = orchextra.openImageRecognition()
 
   override fun startScanner() = orchextra.openScanner()
+
+  override fun scanCode(scanCodeListener: (String) -> Unit) = with(orchextra) {
+    scanCode(scanCodeListener)
+  }
 
   override fun init(application: Application, config: OxConfig, statusListener: StatusListener) {
 
@@ -89,24 +92,16 @@ class Ox3ManagerImpl : OxManager {
   }
 
   override fun setBusinessUnits(businessUnits: List<String>, statusListener: StatusListener) {
-    orchextra.getCrmManager().setDeviceData(null, businessUnits, {
-      statusListener.onSuccess()
-    })
+    orchextra.getCrmManager().setDeviceData(null, businessUnits, { statusListener.onSuccess() })
   }
 
   override fun bindUser(crmUser: CrmUser, statusListener: StatusListener) {
     val crm = OxCRM(crmUser.crmId, crmUser.gender?.name, crmUser.birthdate?.time)
-    orchextra.getCrmManager().bindUser(crm, {
-      statusListener.onSuccess()
-    })
+    orchextra.getCrmManager().bindUser(crm, { statusListener.onSuccess() })
   }
 
   override fun setCustomSchemeReceiver(customSchemeReceiver: OnCustomSchemeReceiver) {
-    orchextra.setCustomActionListener(object : OrchextraCustomActionListener {
-      override fun onCustomSchema(customSchema: String) {
-        customSchemeReceiver.onReceive(customSchema)
-      }
-    })
+    orchextra.setCustomActionListener { customSchemeReceiver.onReceive(it) }
   }
 
   override fun onCustomScheme(customScheme: String) {
