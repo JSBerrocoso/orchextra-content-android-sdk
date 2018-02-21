@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.WebStorage;
 import android.widget.ImageView;
@@ -347,13 +348,19 @@ public final class OCManager {
   //endregion
 
   static void initOrchextra(String oxKey, String oxSecret, Class notificationActivityClass,
-      String senderId, ImageRecognition vuforia,
+      String senderId, ImageRecognition vuforia, @NonNull String businessUnit,
       @Nullable final OcmCredentialCallback ocmCredentialCallback) {
 
     if (OCManager.instance != null) {
 
+      List<String> businessUnits = new ArrayList<>();
+      if (!businessUnit.isEmpty()) {
+        businessUnits.add(businessUnit);
+      }
+
       Application app = (Application) instance.ocmContextProvider.getApplicationContext();
-      OxConfig oxConfig = new OxConfig(oxKey, oxSecret, "", "", notificationActivityClass);
+      OxConfig oxConfig =
+          new OxConfig(oxKey, oxSecret, "", "", businessUnits, notificationActivityClass);
 
       instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
         @Override public void onSuccess() {

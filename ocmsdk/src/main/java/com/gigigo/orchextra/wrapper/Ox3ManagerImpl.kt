@@ -66,6 +66,7 @@ class Ox3ManagerImpl : OxManager {
     val options = OrchextraOptions.Builder().firebaseApiKey(config.firebaseApiKey)
         .firebaseApplicationId(config.firebaseApplicationId)
         .debuggable(true)
+        .deviceBusinessUnits(config.deviceBusinessUnits)
         .build()
 
     orchextra.init(application, config.apiKey, config.apiSecret, options)

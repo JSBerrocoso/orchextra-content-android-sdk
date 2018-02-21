@@ -83,7 +83,7 @@ public final class Ocm {
     }
 
     OCManager.initOrchextra(oxKey, oxSecret, notificationActivityClass, ocmBuilder.getOxSenderId(),
-        ocmBuilder.getVuforiaImpl(), onCredentialCallback);
+        ocmBuilder.getVuforiaImpl(), ocmBuilder.getBusinessUnit(), onCredentialCallback);
   }
 
   public static void getOxToken(final OcmCredentialCallback ocmCredentialCallback) {

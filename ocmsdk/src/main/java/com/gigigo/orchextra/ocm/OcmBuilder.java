@@ -20,11 +20,11 @@ public final class OcmBuilder {
   private OnEventCallback onEventCallback;
 
   private String oxSenderId;
+  private String businessUnit = "";
   private ImageRecognition vuforiaImpl;
   private boolean showReadArticles = false;
   private ImageTransformReadArticle transformReadArticleMode = ImageTransformReadArticle.OVERLAY;
-  private int maxReadArticles=100;
-
+  private int maxReadArticles = 100;
 
   public int getMaxReadArticles() {
     return maxReadArticles;
@@ -45,7 +45,7 @@ public final class OcmBuilder {
     return this;
   }
 
-  private com.bumptech.glide.load.Transformation<Bitmap> customBitmapTransformReadArticle =null;
+  private com.bumptech.glide.load.Transformation<Bitmap> customBitmapTransformReadArticle = null;
 
   /**
    * setter for do vuforia optional in ocm, setted from intetragion app
@@ -109,6 +109,11 @@ public final class OcmBuilder {
     return this;
   }
 
+  public OcmBuilder setBusinessUnit(String businessUnit) {
+    this.businessUnit = businessUnit;
+    return this;
+  }
+
   /**
    * Set the sdk language
    */
@@ -140,6 +145,10 @@ public final class OcmBuilder {
 
   String getOxKey() {
     return oxKey;
+  }
+
+  public String getBusinessUnit() {
+    return businessUnit;
   }
 
   String getOxSecret() {
