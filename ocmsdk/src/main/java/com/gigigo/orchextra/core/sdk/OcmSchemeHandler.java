@@ -152,13 +152,6 @@ public class OcmSchemeHandler {
           processScanAction();
         }
         break;
-      case OPEN_SCANNER:
-        OCManager.notifyEvent(OcmEvent.OPEN_SCANNER, cachedElement);
-        if (render != null) {
-          String slug = cachedElement.getSlug();
-          processScanCode(code -> Log.d(TAG, "Code: " + code + ", slug: " + slug));
-        }
-        break;
       case WEBVIEW:
         OCManager.notifyEvent(OcmEvent.VISIT_URL, cachedElement);
         if (render != null) {
@@ -240,7 +233,17 @@ public class OcmSchemeHandler {
 
   private void processDeepLink(String uri) {
     Log.d(TAG, "processDeepLink: " + uri);
-    actionHandler.processDeepLink(uri);
+
+    if (uri.contains("openScanner")) {
+      processScanCode(code -> {
+        String action = uri.replaceAll("^[a-z]*://openScanner/", "");
+
+        Log.d(TAG, "Code: " + code + " Action: " + action);
+        processElementUrl(action);
+      });
+    } else {
+      actionHandler.processDeepLink(uri);
+    }
   }
 
   private void openDetailActivity(String elementUrl, String urlImageToExpand, int widthScreen,
