@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.webkit.WebStorage;
 import android.widget.ImageView;
@@ -54,8 +55,6 @@ import java.util.Map;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import orchextra.javax.inject.Inject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public final class OCManager {
 
@@ -114,6 +113,15 @@ public final class OCManager {
   public static void setCustomUrlCallback(CustomUrlCallback customUrlCallback) {
 
     getInstance().customUrlCallback = customUrlCallback;
+  }
+
+  @android.support.annotation.Nullable public static CustomUrlCallback getCustomUrlCallback() {
+
+    if (getInstance() != null) {
+      return getInstance().customUrlCallback;
+    } else {
+      return null;
+    }
   }
 
   static void setEventCallback(OnEventCallback onEventCallback) {
@@ -239,7 +247,7 @@ public final class OCManager {
     }
   }
 
-  public static void notifyCustomBehaviourContinue(@NotNull Map<String, Object> customProperties,
+  public static void notifyCustomBehaviourContinue(@NonNull Map<String, Object> customProperties,
       ViewType viewType, Function1<Boolean, Unit> completion) {
     if (instance != null && instance.ocmCustomBehaviourDelegate != null) {
       instance.ocmCustomBehaviourDelegate.contentNeedsValidation(customProperties, viewType,
@@ -247,7 +255,7 @@ public final class OCManager {
     }
   }
 
-  public static void notifyCustomizationForContent(@NotNull Map<String, Object> customProperties,
+  public static void notifyCustomizationForContent(@NonNull Map<String, Object> customProperties,
       ViewType viewType,
       Function1<? super List<? extends ViewCustomizationType>, Unit> customizationListener) {
     if (instance != null && instance.ocmCustomBehaviourDelegate != null) {
@@ -371,9 +379,6 @@ public final class OCManager {
 
       instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
         @Override public void onSuccess() {
-
-          getInstance().schemeHandler.setCustomUrlCallback(getInstance().customUrlCallback);
-
           if (ocmCredentialCallback != null) {
             instance.oxManager.getToken(token -> {
               ocmCredentialCallback.onCredentialReceiver(token);
@@ -382,7 +387,7 @@ public final class OCManager {
           }
         }
 
-        @Override public void onError(@NotNull String error) {
+        @Override public void onError(@NonNull String error) {
           if (ocmCredentialCallback != null) {
             ocmCredentialCallback.onCredentailError(error);
           }

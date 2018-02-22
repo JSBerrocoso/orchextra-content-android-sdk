@@ -35,7 +35,6 @@ public class OcmSchemeHandler {
   private final OcmController ocmController;
   private final ActionHandler actionHandler;
   private final Authoritation authoritation;
-  private CustomUrlCallback customUrlCallback;
   private String elementURL;
   private String processElementURL;
   private Map<String, String> customParams = new HashMap<>();
@@ -263,15 +262,17 @@ public class OcmSchemeHandler {
       return url;
     } else {
       String newUrl = url;
+
+      for (String param : params) {
+        if (customParams.containsKey(param)) {
+          newUrl = newUrl.replace(param, customParams.get(param));
+        }
+      }
+
+      CustomUrlCallback customUrlCallback = OCManager.getCustomUrlCallback();
       if (customUrlCallback != null) {
         Map<String, String> map = customUrlCallback.actionNeedsValues(params);
-
         for (String param : params) {
-
-          if (customParams.containsKey(param)) {
-            newUrl = newUrl.replace(param, customParams.get(param));
-          }
-
           if (map.containsKey(param)) {
             newUrl = newUrl.replace(param, map.get(param));
           }
@@ -281,9 +282,5 @@ public class OcmSchemeHandler {
       }
       return newUrl;
     }
-  }
-
-  public void setCustomUrlCallback(CustomUrlCallback customUrlCallback) {
-    this.customUrlCallback = customUrlCallback;
   }
 }
