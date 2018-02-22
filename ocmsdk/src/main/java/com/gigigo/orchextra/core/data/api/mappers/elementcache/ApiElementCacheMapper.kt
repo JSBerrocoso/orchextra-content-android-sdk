@@ -30,9 +30,7 @@ class ApiElementCacheMapper(
 
     with(data) {
       tags?.let {
-        for (tag in tags) {
-          tagList.add(tag)
-        }
+        tagList += tags
         model.tags = tagList
       }
 

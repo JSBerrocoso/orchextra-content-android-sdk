@@ -26,6 +26,7 @@ import com.gigigo.orchextra.ocm.sample.ocm.OcmWrapper;
 import com.gigigo.orchextra.ocm.sample.ocm.OcmWrapperImp;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -149,6 +150,15 @@ public class MainActivity extends AppCompatActivity {
 
     Ocm.setOnDoRequiredLoginCallback(onDoRequiredLoginCallback);
     Ocm.setCustomBehaviourDelegate(customPropertiesDelegate);
+    Ocm.setCustomUrlCallback(parameters -> {
+
+      Map<String, String> map = new HashMap<>();
+      for (String parameter : parameters) {
+        map.put(parameter, "TEST");
+      }
+
+      return map;
+    });
 
     initOcm();
   }
@@ -172,9 +182,7 @@ public class MainActivity extends AppCompatActivity {
     View fabSearch = findViewById(R.id.fabSearch);
     View fabClean = findViewById(R.id.fabClean);
 
-    fabClean.setOnClickListener(view -> {
-      adapter.setEmotion("happy");
-    });
+    fabClean.setOnClickListener(view -> getContent());
 
     fabSearch.setOnClickListener(v -> SearcherActivity.open(MainActivity.this));
 

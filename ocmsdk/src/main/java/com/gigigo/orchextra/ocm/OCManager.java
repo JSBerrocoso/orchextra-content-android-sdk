@@ -22,6 +22,7 @@ import com.gigigo.orchextra.core.sdk.di.injector.Injector;
 import com.gigigo.orchextra.core.sdk.di.injector.InjectorImpl;
 import com.gigigo.orchextra.core.sdk.di.modules.OcmModule;
 import com.gigigo.orchextra.core.sdk.model.detail.DetailActivity;
+import com.gigigo.orchextra.ocm.callbacks.CustomUrlCallback;
 import com.gigigo.orchextra.ocm.callbacks.OcmCredentialCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnChangedMenuCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver;
@@ -82,6 +83,7 @@ public final class OCManager {
   private boolean isShowReadedArticles = false;
   private int maxReadArticles = 100;
   private com.bumptech.glide.load.Transformation<Bitmap> readArticlesBitmapTransform;
+  private CustomUrlCallback customUrlCallback;
 
   public static synchronized OCManager getInstance() {
     if (instance != null) {
@@ -107,6 +109,11 @@ public final class OCManager {
   public static void setCustomBehaviourDelegate(
       OcmCustomBehaviourDelegate ocmCustomBehaviourDelegate) {
     getInstance().ocmCustomBehaviourDelegate = ocmCustomBehaviourDelegate;
+  }
+
+  public static void setCustomUrlCallback(CustomUrlCallback customUrlCallback) {
+
+    getInstance().customUrlCallback = customUrlCallback;
   }
 
   static void setEventCallback(OnEventCallback onEventCallback) {
@@ -364,6 +371,9 @@ public final class OCManager {
 
       instance.oxManager.init(app, oxConfig, new OxManager.StatusListener() {
         @Override public void onSuccess() {
+
+          getInstance().schemeHandler.setCustomUrlCallback(getInstance().customUrlCallback);
+
           if (ocmCredentialCallback != null) {
             instance.oxManager.getToken(token -> {
               ocmCredentialCallback.onCredentialReceiver(token);

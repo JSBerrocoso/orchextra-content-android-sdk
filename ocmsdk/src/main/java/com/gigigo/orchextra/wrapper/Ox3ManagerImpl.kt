@@ -107,7 +107,7 @@ class Ox3ManagerImpl : OxManager {
   }
 
   override fun onCustomScheme(customScheme: String) {
-    Log.e(TAG, "onCustomScheme not implemented")
+    Log.e(TAG, "onCustomScheme not implemented: $customScheme")
   }
 
   companion object {

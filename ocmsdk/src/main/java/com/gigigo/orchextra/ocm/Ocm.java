@@ -5,6 +5,7 @@ import android.content.Context;
 import com.gigigo.orchextra.core.controller.model.home.ImageTransformReadArticle;
 import com.gigigo.orchextra.core.data.api.utils.ConnectionUtilsImp;
 import com.gigigo.orchextra.core.domain.entities.menus.DataRequest;
+import com.gigigo.orchextra.ocm.callbacks.CustomUrlCallback;
 import com.gigigo.orchextra.ocm.callbacks.OcmCredentialCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnChangedMenuCallback;
 import com.gigigo.orchextra.ocm.callbacks.OnCustomSchemeReceiver;
@@ -239,6 +240,10 @@ public final class Ocm {
   public static void setCustomBehaviourDelegate(
       OcmCustomBehaviourDelegate ocmCustomBehaviourDelegate) {
     OCManager.setCustomBehaviourDelegate(ocmCustomBehaviourDelegate);
+  }
+
+  public static void setCustomUrlCallback(CustomUrlCallback customUrlCallback) {
+    OCManager.setCustomUrlCallback(customUrlCallback);
   }
 
   public static void setQueryStringGenerator(QueryStringGenerator queryStringGenerator) {

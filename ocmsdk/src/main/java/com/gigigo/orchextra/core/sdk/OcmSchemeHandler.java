@@ -1,5 +1,6 @@
 package com.gigigo.orchextra.core.sdk;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
@@ -17,10 +18,14 @@ import com.gigigo.orchextra.core.sdk.application.OcmContextProvider;
 import com.gigigo.orchextra.core.sdk.model.detail.DetailActivity;
 import com.gigigo.orchextra.core.sdk.ui.OcmWebViewActivity;
 import com.gigigo.orchextra.core.sdk.utils.DeviceUtils;
+import com.gigigo.orchextra.core.sdk.utils.UrlUtilsKt;
 import com.gigigo.orchextra.ocm.OCManager;
 import com.gigigo.orchextra.ocm.OcmEvent;
+import com.gigigo.orchextra.ocm.callbacks.CustomUrlCallback;
 import com.gigigo.orchextra.wrapper.OxManager;
 import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.Map;
 
 public class OcmSchemeHandler {
 
@@ -29,6 +34,7 @@ public class OcmSchemeHandler {
   private final OcmController ocmController;
   private final ActionHandler actionHandler;
   private final Authoritation authoritation;
+  private CustomUrlCallback customUrlCallback;
   private String elementURL;
   private String processElementURL;
 
@@ -156,6 +162,7 @@ public class OcmSchemeHandler {
       case WEBVIEW:
         OCManager.notifyEvent(OcmEvent.VISIT_URL, cachedElement);
         if (render != null) {
+          render.setUrl(processUrl(render.getUrl()));
           OcmWebViewActivity.open(contextProvider.getCurrentActivity(), render, "");
         }
         break;
@@ -163,13 +170,13 @@ public class OcmSchemeHandler {
       case BROWSER:
         OCManager.notifyEvent(OcmEvent.VISIT_URL, cachedElement);
         if (render != null) {
-          processCustomTabs(render.getUrl(), render.getFederatedAuth());
+          processCustomTabs(processUrl(render.getUrl()), render.getFederatedAuth());
         }
         break;
       case EXTERNAL_BROWSER:
         OCManager.notifyEvent(OcmEvent.VISIT_URL, cachedElement);
         if (render != null) {
-          processExternalBrowser(render.getUrl(), render.getFederatedAuth());
+          processExternalBrowser(processUrl(render.getUrl()), render.getFederatedAuth());
         }
         break;
       case DEEP_LINK:
@@ -232,6 +239,7 @@ public class OcmSchemeHandler {
   }
 
   private void processDeepLink(String uri) {
+    Log.d(TAG, "processDeepLink: " + uri);
     actionHandler.processDeepLink(uri);
   }
 
@@ -239,5 +247,30 @@ public class OcmSchemeHandler {
       int heightScreen, ImageView imageViewToExpandInDetail) {
     DetailActivity.open(contextProvider.getCurrentActivity(), elementUrl, urlImageToExpand,
         widthScreen, heightScreen, imageViewToExpandInDetail);
+  }
+
+  @NonNull private String processUrl(@NonNull String url) {
+
+    List<String> params = UrlUtilsKt.getUrlParameters(url);
+
+    if (params.isEmpty()) {
+      return url;
+    } else {
+      String newUrl = url;
+      if (customUrlCallback != null) {
+        Map<String, String> map = customUrlCallback.actionNeedsValues(params);
+
+        for (String param : params) {
+          newUrl = newUrl.replace(param, map.get(param));
+        }
+      } else {
+        Log.e(TAG, "customUrlCallback is null");
+      }
+      return newUrl;
+    }
+  }
+
+  public void setCustomUrlCallback(CustomUrlCallback customUrlCallback) {
+    this.customUrlCallback = customUrlCallback;
   }
 }

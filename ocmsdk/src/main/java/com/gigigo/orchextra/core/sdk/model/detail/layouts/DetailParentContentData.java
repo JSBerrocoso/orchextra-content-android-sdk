@@ -3,6 +3,7 @@ package com.gigigo.orchextra.core.sdk.model.detail.layouts;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import orchextra.javax.inject.Inject;
 
 public abstract class DetailParentContentData extends UiBaseContentData {
 
+  private static final String TAG = "OcmSchemeHandler";
   protected OnFinishViewListener onFinishListener;
   protected OnShareListener onShareListener;
   protected DetailToolbarView detailToolbarView;
@@ -150,6 +152,7 @@ public abstract class DetailParentContentData extends UiBaseContentData {
   }
 
   private void processDeepLink(String uri) {
+    Log.d(TAG, "processDeepLink: " + uri);
     actionHandler.processDeepLink(uri);
   }
 
