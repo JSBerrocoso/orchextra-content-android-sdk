@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
       Map<String, String> map = new HashMap<>();
       for (String parameter : parameters) {
-        map.put(parameter, "TEST");
+        map.put("TEST", "TEST");
       }
 
       return map;

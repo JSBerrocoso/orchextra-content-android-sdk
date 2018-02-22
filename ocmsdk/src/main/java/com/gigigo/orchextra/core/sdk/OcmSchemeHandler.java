@@ -24,6 +24,7 @@ import com.gigigo.orchextra.ocm.OcmEvent;
 import com.gigigo.orchextra.ocm.callbacks.CustomUrlCallback;
 import com.gigigo.orchextra.wrapper.OxManager;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ public class OcmSchemeHandler {
   private CustomUrlCallback customUrlCallback;
   private String elementURL;
   private String processElementURL;
+  private Map<String, String> customParams = new HashMap<>();
 
   public OcmSchemeHandler(OcmContextProvider contextProvider, OcmController ocmController,
       ActionHandler actionHandler, Authoritation authoritation) {
@@ -236,8 +238,9 @@ public class OcmSchemeHandler {
 
     if (uri.contains("openScanner")) {
       processScanCode(code -> {
-        String action = uri.replaceAll("^[a-z]*://openScanner/", "");
+        customParams.put("#code#", code);
 
+        String action = uri.replaceAll("^[a-z]*://openScanner/", "");
         Log.d(TAG, "Code: " + code + " Action: " + action);
         processElementUrl(action);
       });
@@ -264,7 +267,14 @@ public class OcmSchemeHandler {
         Map<String, String> map = customUrlCallback.actionNeedsValues(params);
 
         for (String param : params) {
-          newUrl = newUrl.replace(param, map.get(param));
+
+          if (customParams.containsKey(param)) {
+            newUrl = newUrl.replace(param, customParams.get(param));
+          }
+
+          if (map.containsKey(param)) {
+            newUrl = newUrl.replace(param, map.get(param));
+          }
         }
       } else {
         Log.e(TAG, "customUrlCallback is null");
