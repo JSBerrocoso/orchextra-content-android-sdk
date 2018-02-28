@@ -186,18 +186,15 @@ public final class OCManager {
       clearCallback.onDataClearFails(new Exception("instance != null"));
     }
   }
+  public static void processElementUrl(String elementUrl, ImageView imageViewToExpandInDetail, OcmSchemeHandler.ProcessElementCallback processElementCallback) {
+
+    if (instance != null) {
+      instance.schemeHandler.processElementUrl(elementUrl, imageViewToExpandInDetail, processElementCallback);
+    }
+  }
 
   public static UiDetailBaseContentData generateDetailView(String elementUrl) {
     return instance.ocmViewGenerator.generateDetailView(elementUrl);
-  }
-
-  public static void generateDetailView(String elementUrl, String urlImageToExpand, int widthScreen,
-      int heightScreen, ImageView imageViewToExpandInDetail) {
-
-    if (instance != null) {
-      instance.schemeHandler.processElementUrl(elementUrl, urlImageToExpand, widthScreen,
-          heightScreen, imageViewToExpandInDetail);
-    }
   }
 
   static UiSearchBaseContentData generateSearchView() {
